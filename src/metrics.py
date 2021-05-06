@@ -107,6 +107,28 @@ def makeSensitivity(fr, model,style='TN'):
     S_h = S_hX / N
     return S_h
 
+#Make SNR for continuous-wave source
+def getCWsnr(f0,h0,T,model,style='TN'):
+    '''
+    Compute the SNR for a monochromatic GW source based on the source frequency f0, source ampltiude h0, obsertvation time T, and an instrument model.
+    
+    The calculation follows (83) from the LISA-LCST-SGS-TN-001 to compute the inclinaiton, polarization, and sky-position averaged SNR for a monochomatic source:
+    $$
+    \left<SNR^2\right>_{\iota,\psi,sky} = 10 \frac{\left(\frac{2}{5}h_0\right)^2T}{S_h\left(f_0\right)}
+    $$
+    
+    where the instrument sensitivity is computed from the provided model and the makeSensitivity method
+    '''
+    
+    
+    # compute sensitivity at the GW frequency from the model
+    S_h_f0 = makeSensitivity(f0,model,style)
+    
+    # apply equation (83)
+    rho2 = 10*(((2./5.)*h0)**2)*T/S_h_f0 
+    
+    # return SNR
+    return np.sqrt(rho2)
 
 ### Imaging
 
