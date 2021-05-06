@@ -12,3 +12,14 @@ LISASciRDv1 = {
     'Nindep' : 2
 }
 
+#LISA Grande
+LISAGrande = {
+    'label' : 'LISAGrande',
+    'sqSacc_level' : 1e-15,
+    'sqSoms_level' : 18e-12,
+    'Lconst' : 5e10,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2
+}
