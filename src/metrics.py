@@ -1,13 +1,7 @@
 #These are functions used for GW mission sensitivity calculations and other figures of merit related to GW iimaging or sky localization
 
 import numpy as np
-
-#Define some constants
-constants = {
-    'c' : 299792458.0,  ## Speed of light
-    'year' : 31558149.763545603, ## Year in seconds    
-    'AU' : 499.00478383615643    ## Astronomical Unit in light-seconds
-}
+import constants
 
 #Probably adapt more for GW Imager concepts 
 def PSD_noise_components(fr, model):
@@ -18,24 +12,24 @@ def PSD_noise_components(fr, model):
     - a measure of optical measurement system noise in $m/\sqrt(Hz)$
     The noise PSD is reported in fractional frequency units
     '''
-    if 'sqSacc_level' in model:
-        sqSacc_level = model.get('sqSacc_level') 
-    else:
-        sqSacc_level = model.get('sqSacc_func')(model) #Can provide a func here instesad of a value
-    if 'sqSoms_level' in model:
-        sqSoms_level = model.get('sqSoms_level')
-    else:
-        sqSoms_level = model.get('sqSoms_func')(model) #Can provide a func based Jeff's calculations
-    
-    c=constants['c']
+        
+    c=constants.c
     
     ### Acceleration noise
-    Sa_a = sqSacc_level**2 *(1.0 +(0.4e-3/fr)**2)*(1.0+(fr/8e-3)**4)
+    if 'sqSacc_level' in model:
+        sqSacc_level = model.get('sqSacc_level') 
+        Sa_a = sqSacc_level**2 *(1.0 +(0.4e-3/fr)**2)*(1.0+(fr/8e-3)**4)
+    else:
+        Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instesad of a value
     Sa_d = Sa_a*(2.*np.pi*fr)**(-4.)
     Sa_nu = Sa_d*(2.0*np.pi*fr/c)**2
 
     ### Optical Metrology System
-    Soms_d = sqSoms_level**2 * (1. + (2.e-3/fr)**4)
+    if 'sqSoms_level' in model:
+        sqSoms_level = model.get('sqSoms_level')
+        Soms_d = sqSoms_level**2 * (1. + (2.e-3/fr)**4)
+    else:
+        Soms_d = model.get('sqSoms_func')(fr, model) #Can provide a func based Jeff's calculations
     Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2
     
     return [Sa_nu, Soms_nu]
@@ -91,7 +85,7 @@ def makeSensitivity(fr, model,style='TN'):
     [Sa_nu,Soms_nu] = PSD_noise_components(fr, model)
     L=model.get('Lconst')
     N=model.get('Nindep')
-    c=constants['c']
+    c=constants.c
     phiL = 2*np.pi*fr*L/c
     if style=='TN':
         AvFXp2 = AvFXp2_approx(fr,L/c)
@@ -155,8 +149,8 @@ def dResRange(fr,model):
     '''
     
     D=model['Lconst']
-    c=constants['c']
-    au=constants['AU']*c
+    c=constants.c
+    au=constants.AU*c
     if 'Dsep' in model: D=max([D,model['Dsep']*au])
     Dshort=D
     if 'Rorbit' in model: D=max([D,2*model['Rorbit']*au])
