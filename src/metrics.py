@@ -124,6 +124,55 @@ def getCWsnr(f0,h0,T,model,style='TN'):
     # return SNR
     return np.sqrt(rho2)
 
+#Make snr from a source
+def getSourceSnr(source,model,style='TN'):
+    '''
+    Compute the SNR given a GW source description and a GW model, both as dictionaries. 
+    
+    The calculaiton will use the SNR computation method that is relevant for that source
+    '''
+    
+    stype = source.get('type')
+    # continuous-wave source
+    if stype == 'CW':
+        # get the chirp mass, first we try chirp mass directlycomponent masses
+        try:
+            mchirp = source.get('mchirp')
+            mtot = source.get('mtot')
+        # failing that, we try the component masses
+        except:
+            m1 = source.get('m1')
+            m2 = source.get('m2')
+            mchirp = ((m1*m2)**(2/5))/((m1+m2)**(1/5))
+            mtot = m1+m2
+            
+        # get the frequency, compute the semi-major axis
+        try:
+            f0 = source.get('f0')
+            a = ((4*np.pi*f0)**2 / mtot)**(1/3)
+        # 
+        # get the semi-major axis, compute the frequency
+        except:
+            a = source.get('a')
+            f0 = (1/(4*np.pi))*(mtot/(a**3))**(1/2)
+            
+        # get the luminosity distance
+        dl = source.get('dl')
+        
+        # compute the ampltiude
+        h0 = (2/dl)*(M**(5/3))*((np.pi*f0)**(2/3))
+        
+        # get the observation time
+        rho = getCWsnr(f0,h0,T,model,style)
+        
+        return rho
+        
+    # unsupported source, maybe need to throw an error/warning
+    else: 
+        print('Unsupported source type')
+        return -1.0
+    
+
 ### Imaging
 
 def dResRange(fr,model):
