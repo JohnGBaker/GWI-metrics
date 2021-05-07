@@ -70,4 +70,45 @@ def OMS_received_power(model):
     P_Rx=scaling_const*P_Tx*D_Tx**2*D_Rx**2/(L_arm*lambdaOMS)**2
     return P_Rx
     
-           
+def ACC_noise_PSD(fr, model)
+    VacuumPressure = 1e-6
+    Sdeltax=(4.5e-6)**2+(75e-6)**2*(1e-4/fr)+(190e-6)**2*(1e-4./fr)**2
+    omegasquareGRSxx=-7e-7
+    S_alpha_UC_f1=4E-6**2*(1e-3/fr)
+    S_alpha_UC_f2=50E-6**2*(1e-4/fr)**2
+    MU0=1.25663706143592e-06
+    S_Mean_B=(8.7e-9)**2*(1+(15e-3/fr)**(4/3))
+    S_x_GRS=(0.3e-9)**2*(1+(1.5e-3/fr)**2)
+    Xf = [1]*len(fr)
+    
+    if 'TMsize' in model:
+        TMsize = model.get('TMsize')
+    else:
+        TMsize = .046;
+
+    if 'TMmat' in model:
+        TMmat = model.get('TMmat')
+        if TMmat = 'AuPt'
+            TMmass = 1.93*(TMsize/.046)**3
+            chi_B=3e-5
+        elif: TMmat = 'W'
+            TMmass = (19.3/19.8)*1.93*(TMsize/.046)**3
+            chi_B=0.0000884
+        else:
+            TMmass = 1.93*(TMsize/.046)**3
+            chi_B=3e-5
+    else:
+        TMmass = 1.93*(TMsize/.046)**3
+        chi_B=3e-5
+
+    ActWN = Xf*2.96305934878798e-16*(TMmass)**0.5
+    ActStab = (3.53925e-21*(S_alpha_UC_f1+S_alpha_UC_f2))**0.5
+    Brownian = Xf*1.20182493769848e-15*TMsize/TMmass*(VacuumPressure**0.5)
+    MagLF = (2*(chi_B/MU0)**2*(4e-14*S_Mean_B))**0.5*TMsize**2/TMmass
+    MagDc = (1/3*(4e-15**2*(1e-4/fr)**2+0.5e-15**2))**0.5
+    StrayV= (2.42729210509713e-22*Sdeltax)**0.5./TMmass
+    TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5
+
+    ACC = (ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2)**0.5
+    return ACC
+
