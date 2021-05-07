@@ -40,3 +40,21 @@ LISAGrande = {
     'Torbit' : 1.0,
     'Nindep' : 2
 }
+
+#Baseline LISA concept GoBIGLowF
+GoBIGLowF = {
+    'label' : 'GoBig(LowF)',
+    'description' : 'Two LISA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version optimized for the low-ff side of LISA\'s band.',
+    'sqSacc_level' : 3e-15,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 5,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    'OMS_other_PSD' : 10e-12,
+    'Lconst' : 50e9,
+    'Dsep' : 30,
+    'Rorbit' : 0,
+    'Torbit' : 0,
+    'Nindep' : 2
+}
