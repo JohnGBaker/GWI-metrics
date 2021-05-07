@@ -135,34 +135,49 @@ def getSourceSnr(source,model,style='TN'):
     stype = source.get('type')
     # continuous-wave source
     if stype == 'CW':
-        # get the chirp mass, first we try chirp mass directlycomponent masses
-        try:
-            mchirp = source.get('mchirp')
-            mtot = source.get('mtot')
-        # failing that, we try the component masses
-        except:
-            m1 = source.get('m1')
-            m2 = source.get('m2')
-            mchirp = ((m1*m2)**(2/5))/((m1+m2)**(1/5))
-            mtot = m1+m2
-            
-        # get the frequency, compute the semi-major axis
-        try:
+        
+        # just do the frequency and amplitude
+        if 'h0' in source:
+            h0 = source.get('h0')
             f0 = source.get('f0')
-            a = ((4*np.pi*f0)**2 / mtot)**(1/3)
-        # 
-        # get the semi-major axis, compute the frequency
-        except:
-            a = source.get('a')
-            f0 = (1/(4*np.pi))*(mtot/(a**3))**(1/2)
-            
-        # get the luminosity distance
-        dl = source.get('dl')
         
-        # compute the ampltiude
-        h0 = (2/dl)*(M**(5/3))*((np.pi*f0)**(2/3))
-        
+        else :
+
+            # get the chirp mass, first we try chirp mass directlycomponent masses
+            if 'mchirp' in source:
+                mchirp = source.get('mchirp')
+                mtot = source.get('mtot')
+            # failing that, we try the component masses
+            else:
+                m1 = source.get('m1')
+                m2 = source.get('m2')
+                mchirp = ((m1*m2)**(2./5.))/((m1+m2)**(1./5.))
+                mtot = m1+m2
+
+            # convert to seconds
+            mtot = mtot * constants.MSun2s
+            mchirp = mchirp * constants.MSun2s
+
+            # get the frequency, compute the semi-major axis
+            if 'f0' in source:
+                f0 = source.get('f0')
+                a = (mtot / (np.pi*f0)**2)**(1./3.)
+            # get the semi-major axis, compute the frequency
+            else:
+                a = source.get('a')*constants.AU
+                f0 = (1./np.pi)*(mtot/(a**3.))**(1./2.)
+
+            # get the luminosity distance
+            dl = source.get('dl')*constants.kpc2s
+
+            # compute the ampltiude
+            h0 = (2./dl)*(mchirp**(5./3.))*((np.pi*f0)**(2./3.))
+
+
         # get the observation time
+        T = source.get('T')
+
+        # compute the SNR
         rho = getCWsnr(f0,h0,T,model,style)
         
         return rho
@@ -171,6 +186,7 @@ def getSourceSnr(source,model,style='TN'):
     else: 
         print('Unsupported source type')
         return -1.0
+    
     
 
 ### Imaging
