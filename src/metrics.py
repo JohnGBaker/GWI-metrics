@@ -180,7 +180,17 @@ def getSourceSnr(source,model,style='TN'):
         # compute the SNR
         rho = getCWsnr(f0,h0,T,model,style)
         
-        return rho
+        # copy source to return with computed parameters
+        sourceOut = source.copy()
+        sourceOut['snr'] = rho
+        sourceOut['T'] = T
+        if not('f0' in sourceOut):
+            sourceOut['f0']=f0
+        
+        if not('h0' in sourceOut):
+            sourceOut['h0']=h0
+        
+        return rho, sourceOut
         
     # unsupported source, maybe need to throw an error/warning
     else: 
