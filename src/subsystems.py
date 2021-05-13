@@ -79,7 +79,9 @@ def ACC_Noise_PSD(fr, model):
     MU0=1.25663706143592e-06
     S_Mean_B=(8.7e-9)**2*(1+(15e-3/fr)**(4/3))
     S_x_GRS=(0.3e-9)**2*(1+(1.5e-3/fr)**2)
-    Xf = fr*0*1
+    omegasquarexx = -8e-7;
+    Sx_tm=(0.95e-9)**2*(1+(2e-4/fr)**2)*(1+(fr/8e-3)**4)/(1+(fr/8e-3/(10**0.5))**4);
+    Xf = fr/fr
     
     
     if 'TMsize' in model:
@@ -105,12 +107,13 @@ def ACC_Noise_PSD(fr, model):
 
     ActWN = Xf*2.96305934878798e-16*(TMmass)**0.5
     ActStab = (3.53925e-21*(S_alpha_UC_f1+S_alpha_UC_f2))**0.5
-    Brownian = Xf*1.20182493769848e-15*TMsize/TMmass*(VacuumPressure**0.5)
+    Brownian = Xf*5.0424e-11*TMsize/TMmass*(VacuumPressure**0.5)
     MagLF = (2*(chi_B/MU0)**2*(4e-14*S_Mean_B))**0.5*TMsize**2/TMmass
     MagDc = (1/3*(4e-15**2*(1e-4/fr)**2+0.5e-15**2))**0.5
     StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass
     TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5
+    Xstiff = (Sx_tm*abs(omegasquarexx)**2)**0.5
 
-    ACC = (ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2)
+    ACC = (ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2+Xstiff**2)
     return ACC
 
