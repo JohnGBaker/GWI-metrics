@@ -111,6 +111,6 @@ def ACC_Noise_PSD(fr, model):
     StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass
     TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5
 
-    ACC = (ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2)**0.5
-    return ACC**2
+    ACC = (ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2)
+    return ACC
 
