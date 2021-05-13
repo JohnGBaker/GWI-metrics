@@ -105,7 +105,7 @@ def ACC_Noise_PSD(fr, model):
         TMmass = TMmassAu
         chi_B=3e-5
 
-    ActWN = Xf*2.96305934878798e-16*(TMmass)**0.5
+    ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5
     ActStab = (3.53925e-21*(S_alpha_UC_f1+S_alpha_UC_f2))**0.5
     Brownian = Xf*5.0424e-11*TMsize/TMmass*(VacuumPressure**0.5)
     MagLF = (2*(chi_B/MU0)**2*(4e-14*S_Mean_B))**0.5*TMsize**2/TMmass
