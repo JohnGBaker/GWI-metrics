@@ -101,6 +101,33 @@ def makeSensitivity(fr, model,style='TN'):
     S_h = S_hX / N
     return S_h
 
+# Get the baseline for a particualr model
+def getBaseline(model,t=0,tstart=0):
+    '''
+    Compute the effective baseline for a concept depending on the parameters in the model. 
+    If a multi-constellation model, the baseline is always defined by the DSep parameter (e.g Dsep ~= 0)
+    For single constellations, the baseline starts as the detector size and increases with time according to the orbital parameters
+    The parameter t defines the time(s) at which to evaluate the orbit.
+    The parameter tstart is the time at which to start including orbital effects (e.g. after some SNR threshold)
+    '''
+    
+    # minimum baseline is the detector size
+    B = np.zeros_like(t) + model.get('Lconst')/constants.c
+    
+    # if you have multiple constellations, use the Dsep parameter (which is in what units?)
+    if 'Dsep' in model:
+        Dsep = model.get('Dsep')
+        if Dsep > 0:
+            return Dsep*constants.AU + B
+        
+    # otherwise start using your orbit from tstart
+    istart = np.argmin(np.abs(t-tstart))
+    theta = 2*np.pi*np.clip((t[istart:]-t[istart])/(model.get('Torbit')*constants.year),0,0.5)
+    Borbit = model.get('Rorbit')*constants.AU*np.sqrt(2*(1-np.cos(theta)))
+    B[istart:]= B[istart:]+Borbit
+    return B
+    
+        
 #Make SNR for continuous-wave source
 def getCWsnr(f0,h0,T,model,style='TN'):
     '''
