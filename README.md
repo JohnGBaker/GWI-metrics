@@ -2,8 +2,10 @@
 Bits for space-based GW mission studies
 Links for notebooks in CoLab:
 
-[MetricsNotebook In Colab](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/MetricsNotebook.ipynb)
+[MetricsNotebook](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/MetricsNotebook.ipynb)
 
-[CWSNRNotebook In Colab](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/CWSNRNotebook.ipynb)
+[CWSNRNotebook](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/CWSNRNotebook.ipynb)
 
-[binaryResolution In Colab](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/binaryResolution.ipynb)
+[binaryResolution](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/binaryResolution.ipynb)
+
+[MBHBwaveCheck](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/MBHBwaveCheck.ipynb)
