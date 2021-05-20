@@ -26,7 +26,13 @@ LISASciRDLowLev = {
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'TMxOmega2' : -8e-7,
+    'OBGRSOmega2' : -7e-7,
+    'TMsize' : 0.046,
+    'TMmat' : 'AuPt',
+    'VacuumPressure' : 1e-6,
+    'ACCEL_other_PSD' : 0
 }
 
 #LISA Grande
@@ -74,5 +80,7 @@ GoBIGLowF2 = {
     'Dsep' : 30,
     'Rorbit' : 0,
     'Torbit' : 0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'TMsize' : .46,
+    'TMmat'  : 'W'
 }
