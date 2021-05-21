@@ -169,18 +169,26 @@ def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN')
     # get the corresponding frequency vector
     fvals = chirp.fFromT(tvals,mtot,eta)
     
-    # add in the final frequency and time
-    tvals = np.append(tvals,0)
-    fvals = np.append(fvals,chirp.getFcut(mtot,eta))
-    
     # get the corresponding amplitude 
     hvals = chirp.binaryAmp(fvals,mtot,eta,dl)
     Sh = makeSensitivity(fvals, model)
     snri = 4*np.real(hvals*np.conjugate(hvals)/Sh)
-    snr = np.sqrt(np.cumsum(np.diff(fvals)*snri[1:]))
+    snrt = np.sqrt(np.cumsum(np.diff(fvals)*snri[1:]))
     tvals = tvals[1:]
     
-    return snr, tvals, fvals, hvals
+    # for the total SNR, we integrate over all the frequencies to better sample the waveform
+    fsnr = np.logspace(np.log10(fvals[0]),np.log10(chirp.getFcut(mtot,eta)),Npts)
+    hsnr = chirp.binaryAmp(fsnr,mtot,eta,dl)
+    Shsnr = makeSensitivity(fsnr,model)
+    snri = 4*np.real(hsnr*np.conjugate(hsnr)/Shsnr)
+    snr = np.sqrt(np.sum(np.diff(fsnr)*snri[1:]))
+    
+    # add in the final frequency and time
+    tvals = np.append(tvals,0)
+    snrt = np.append(snrt,snr)
+
+    
+    return snrt, tvals, fsnr, hsnr
     
 #Make snr from a source
 def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
@@ -263,7 +271,7 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
             ds = source.get('dl')*constants.kpc2s
             
     
-            print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
+            #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
             snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style)
         
             i10 = np.argmin(np.abs(snrt-10))
