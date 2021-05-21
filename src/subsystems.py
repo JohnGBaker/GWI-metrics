@@ -26,7 +26,7 @@ def OMS_Noise_PSD(fr, model):
     D_Rx          | m           | Receiver mirror diameter (optional, otherwise=D_Tx)
     Responsivity  | A/W         | Photodetector responsivity [need Resp or QE]
     QE            | -           | Ouantum Efficiency [need Resp or QE]
-    OMS_other_PSD | m/sqrt(Hz)  | Other sources of OMS noise to add in quadrature  
+    OMS_other_ASD | m/sqrt(Hz)  | Other sources of OMS noise to add in quadrature  
     '''
     P_Tx=model['P_Tx']
     lambdaOMS=model['lambdaOMS']*1e-9
@@ -51,9 +51,10 @@ def OMS_Noise_PSD(fr, model):
     print('sqSn_shot:',np.sqrt(Sn_shot))
     
     OMS_other=0
-    if 'OMS_other_PSD' in model: OMS_other=model['OMS_other_PSD']
+    if 'OMS_other_ASD' in model:OMS_other=model['OMS_other_ASD']
+    OMS_other_ASD = F_Noise_PSD(fr,OMS_other)
     
-    Sn = Sn_shot + OMS_other**2
+    Sn = Sn_shot + OMS_other_ASD**2
     return Sn
 
 def OMS_received_power(model):
@@ -78,16 +79,16 @@ OBGRSOmega2        | s^-2           | OB/GRS TMx stiffness (?)
 TMsize             | m              | TM linear dimension
 TMmat              |                | TM material composition
 VacuumPressure     | Pa             | Residual gas vacuum presure
-ACCEL_other_PSD    | m/s^2          | Catch-all unknown acceleration noise input
+ACCEL_other_ASD    | m/s^2          | Catch-all unknown acceleration noise input
 '''
 
 def ACC_Noise_PSD(fr, model):
 
     # make unit array of same dimensions as frequency array
-    Xf = fr/fr
+    Xf = F_Noise_PSD(fr,[[1],[0]])
 
     #INITIALIZE internal functions and values
-    MU0=1.25663706143592e-06
+    MU0 = constants.MU0
     Sdeltax=(4.5e-6)**2+(75e-6)**2*(1e-4/fr)+(190e-6)**2*(1e-4/fr)**2
     S_alpha_UC_f1=4E-6**2*(1e-3/fr)
     S_alpha_UC_f2=50E-6**2*(1e-4/fr)**2
@@ -125,10 +126,10 @@ def ACC_Noise_PSD(fr, model):
         chi_B=3e-5
     #Vacuum Pressure
     VacuumPressure = 1e-6
-    if 'VacuumPressure' in model: VaccumePressure=model['VacuumPressure']
+    if 'VacuumPressure' in model: VaccumePressure=model.get('VacuumPressure')
     #Margin/misc
     ACCEL_other=0
-    if 'ACCEL_other_PSD' in model: ACCEL_other=model['ACCEL_other_PSD']
+    if 'ACCEL_other_ASD' in model:ACCEL_other=model['ACCEL_other_ASD']
 
     #CALCULATE NOISE TERMS
     ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5
@@ -139,9 +140,35 @@ def ACC_Noise_PSD(fr, model):
     StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass
     TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5
     Xstiff = (Sx_tm*abs(omegasquarexx)**2)**0.5
-    AO = Xf*ACCEL_other
+    AO = F_Noise_PSD(fr,ACCEL_other)
 
     #SUM SQUARES
     ACC = ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2+Xstiff**2+AO**2
-
     return ACC
+
+def F_Noise_PSD(fr, pLaws, QUAD=False):
+    if (type(pLaws) is int) or (type(pLaws) is float):
+        freqPower = [0]
+        freqAmp = [pLaws]
+    elif type(pLaws) is list:
+        freqPower = pLaws[:][1]
+        freqAmp = pLaws[:][0]
+            
+    fMatch = len(freqPower) - len(freqAmp)
+    if fMatch > 0: freqAmp += [0]*fMatch
+    if fMatch < 0: freqPower += [0]*(-fMatch)
+    
+    outPSD = np.zeros(len(fr))
+    if QUAD:
+        for ii in range(len(freqPower)):
+            outPSD += (freqAmp[ii]*fr**freqPower[ii])**2
+            ii += 1
+        outPSD = outPSD**0.5
+    else:
+        for ii in range(len(freqPower)):
+            outPSD += freqAmp[ii]*fr**freqPower[ii]
+            ii += 1
+
+    return outPSD
+
+
