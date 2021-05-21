@@ -50,11 +50,9 @@ def OMS_Noise_PSD(fr, model):
     print('P_Rx:',OMS_received_power(model))
     print('sqSn_shot:',np.sqrt(Sn_shot))
     
-    OMS_other=[[0][0]]
-    if 'OMS_other_PSD' in model:
-        OMS_other=model['OMS_other_PSD']
-        if not(type(OMS_other) is list): OMS_other = [[OMS_other],[0]]
-    OMS_other_PSD = F_Noise_PSD(fr,OMS_other[:][0],OMS_other[:][1])
+    OMS_other=0
+    if 'OMS_other_PSD' in model:OMS_other=model['OMS_other_PSD']
+    OMS_other_PSD = F_Noise_PSD(fr,OMS_other)
     
     Sn = Sn_shot + OMS_other_PSD**2
     return Sn
@@ -87,7 +85,7 @@ ACCEL_other_PSD    | m/s^2          | Catch-all unknown acceleration noise input
 def ACC_Noise_PSD(fr, model):
 
     # make unit array of same dimensions as frequency array
-    Xf = F_Noise_PSD(fr,[1],[0])
+    Xf = F_Noise_PSD(fr,[[1],[0]])
 
     #INITIALIZE internal functions and values
     MU0 = constants.MU0
@@ -130,11 +128,8 @@ def ACC_Noise_PSD(fr, model):
     VacuumPressure = 1e-6
     if 'VacuumPressure' in model: VaccumePressure=model.get('VacuumPressure')
     #Margin/misc
-    ACCEL_other=[[0],[0]]
-    if 'ACCEL_other_PSD' in model:
-        ACCEL_other=model['ACCEL_other_PSD']
-        if not(type(ACCEL_other) is list): ACCEL_other = [[ACCEL_other],[0]]
-
+    ACCEL_other=0
+    if 'ACCEL_other_PSD' in model:ACCEL_other=model['ACCEL_other_PSD']
 
     #CALCULATE NOISE TERMS
     ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5
@@ -145,13 +140,20 @@ def ACC_Noise_PSD(fr, model):
     StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass
     TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5
     Xstiff = (Sx_tm*abs(omegasquarexx)**2)**0.5
-    AO = F_Noise_PSD(fr,ACCEL_other[:][0],ACCEL_other[:][1])
+    AO = F_Noise_PSD(fr,ACCEL_other)
 
     #SUM SQUARES
     ACC = ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2+Xstiff**2+AO**2
     return ACC
 
-def F_Noise_PSD(fr, freqAmp, freqPower):
+def F_Noise_PSD(fr, pLaws):
+    if (type(pLaws) is int) or (type(pLaws) is float):
+        freqPower = [0]
+        freqAmp = [pLaws]
+    elif type(pLaws) is list:
+        freqPower = pLaws[:][1]
+        freqAmp = pLaws[:][0]
+            
     fMatch = len(freqPower) - len(freqAmp)
     if fMatch > 0: freqAmp += [0]*fMatch
     if fMatch < 0: freqPower += [0]*(-fMatch)
