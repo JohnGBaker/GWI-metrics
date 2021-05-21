@@ -2,11 +2,8 @@
 
 import numpy as np
 import constants
-<<<<<<< HEAD
 import subsystems
-=======
 import background
->>>>>>> 055e57c2e22c2a9a3b09cd92b95dca54cd336517
 
 #Probably adapt more for GW Imager concepts 
 def PSD_noise_components(fr, model):
