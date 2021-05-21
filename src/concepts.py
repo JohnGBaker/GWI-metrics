@@ -12,7 +12,42 @@ LISASciRDv1 = {
     'Torbit' : 1.0,
     'Nindep' : 2
 }
-#Baseline LISA concept
+
+#LISA CBE
+LISACBE = {
+    'label' : 'LISA(CBE)',
+    'sqSacc_level' : 3e-15,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 1.5,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 0.3,
+    'Responsivity' : 0.7,
+    'OMS_other_PSD' : 1e-12,
+    'Lconst' : 2.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2
+}
+
+#Twin LISA
+TwinLISA = {
+    'label' : 'Twin LISA',
+    'sqSacc_level' : 3e-15,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 1.5,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 0.3,
+    'Responsivity' : 0.7,
+    'OMS_other_PSD' : 1e-12,
+    'Lconst' : 2.5e9,
+    'Dsep' : 1,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 4
+}
+
+#LISA SciRD with low-level noise
 LISASciRDLowLev = {
     'label' : 'LISA(SciRDLowLev)',
     'sqSacc_func' : subsystems.ACC_Noise_PSD,
@@ -35,17 +70,57 @@ LISASciRDLowLev = {
     'ACCEL_other_PSD' : 0
 }
 
-#LISA Grande
 LISAGrande = {
-    'label' : 'LISAGrande',
-    'sqSacc_level' : 1e-15,
-    'sqSoms_level' : 18e-12,
-    'Lconst' : 5e10,
+    'label' : 'LISA Grande',
+    'sqSacc_level' : 3e-15,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 3,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 0.5,
+    'Responsivity' : 0.7,
+    'OMS_other_PSD' : 10e-12,
+    'Lconst' : 25e9,
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
     'Nindep' : 2
 }
+
+# LISA-like mission in Folkner-like orbit
+LISAU = {
+    'label' : 'LIS-AU',
+    'sqSacc_level' : 3e-15,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 3,
+    'lambdaOMS' : 1550,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    'OMS_other_PSD' : 10e-12,
+    'Lconst' : 2.6e11,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2
+}
+
+#Baseline LISA concept GoBIGLowF
+GoBIGLISA = {
+    'label' : 'GoBig(LISA)',
+    'description' : 'Two LISA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version uses a LISA-sized constellation',
+    'label' : 'GOBIG',
+    'sqSacc_level' : 3e-15,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 1.5,
+    'lambdaOMS' : 1550,
+    'D_Tx' : 0.3,
+    'Responsivity' : 0.7,
+    'OMS_other_PSD' : 10e-12,
+    'Lconst' : 5e9,
+    'Dsep' : 30,
+    'Nindep' : 4
+}
+    
+
 
 #Baseline LISA concept GoBIGLowF
 GoBIGLowF = {
