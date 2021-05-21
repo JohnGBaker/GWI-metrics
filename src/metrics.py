@@ -2,6 +2,7 @@
 
 import numpy as np
 import constants
+import PhenomWaveform_nonspinning as chirp
 
 #Probably adapt more for GW Imager concepts 
 def PSD_noise_components(fr, model):
@@ -151,8 +152,34 @@ def getCWsnr(f0,h0,T,model,style='TN'):
     # return SNR
     return np.sqrt(rho2)
 
+#Make SNR for continuous-wave source
+def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN'):
+    '''
+    Compute the SNR for a chirping source
+    '''
+    # set up time vector
+    # stop time is when we get to merger frequency / 3 to avoid PN blow-up
+    tstop = chirp.tFromF(0.3*chirp.getFmerge(mtot,eta),mtot,eta)
+    tvals = -np.flip(np.logspace(np.log10(-tstop),np.log10(-tstart),Npts))
+    
+    # get the corresponding frequency vector
+    fvals = chirp.fFromT(tvals,mtot,eta)
+    
+    # add in the final frequency and time
+    tvals = np.append(tvals,0)
+    fvals = np.append(fvals,chirp.getFcut(mtot,eta))
+    
+    # get the corresponding amplitude 
+    hvals = chirp.binaryAmp(fvals,mtot,eta,dl)
+    Sh = makeSensitivity(fvals, model)
+    snri = 4*np.real(hvals*np.conjugate(hvals)/Sh)
+    snr = np.sqrt(np.cumsum(np.diff(fvals)*snri[1:]))
+    tvals = tvals[1:]
+    
+    return snr, tvals, fvals, hvals
+    
 #Make snr from a source
-def getSourceSnr(source,model,style='TN'):
+def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
     '''
     Compute the SNR given a GW source description and a GW model, both as dictionaries. 
     
@@ -201,9 +228,6 @@ def getSourceSnr(source,model,style='TN'):
             h0 = (2./dl)*(mchirp**(5./3.))*((np.pi*f0)**(2./3.))
 
 
-        # get the observation time
-        T = source.get('T')
-
         # compute the SNR
         rho = getCWsnr(f0,h0,T,model,style)
         
@@ -218,6 +242,42 @@ def getSourceSnr(source,model,style='TN'):
             sourceOut['h0']=h0
         
         return rho, sourceOut
+        
+    # chirping source
+    elif stype == 'chirp':
+            # get the total mass
+            if 'mtot' in source:
+                mtot = source.get('mtot')*constants.MSun2s
+            else:
+                mtot = (source.get('m1') + source.get('m2'))*constants.MSun2s
+                
+            if 'eta' in source:
+                eta = source.get('eta')
+            else:
+                eta = (source.get('m1')*source.get('m2'))/((source.get('m1')+source.get('m2'))**2)
+
+            ds = source.get('dl')*constants.kpc2s
+            
+    
+            print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
+            snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style)
+        
+            i10 = np.argmin(np.abs(snrt-10))
+            t10 = tvals[i10]
+
+            observation = {
+                'source' : source.copy(),
+                'model' : model.copy(),
+                't' : tvals,
+                'f' : fvals,
+                'h' : hvals,
+                'SNR of t' : snrt,
+                'SNR' : snrt[-1],
+                'observation time' : t10
+            }
+            
+            return observation
+            
         
     # unsupported source, maybe need to throw an error/warning
     else: 
