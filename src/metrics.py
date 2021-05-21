@@ -102,6 +102,8 @@ def makeSensitivity(fr, model,style='TN'):
         yTarmRN = yTarmN * (np.sin(np.pi/3.)**2/5)
         S_hX = (Soms_nu + Sa_nu*(3+np.cos(2*phiL)) ) / (phiL**2 * yTarmRN)
     S_h = S_hX / N
+    #add optional background
+    S_h += background.compute_background_PSD(fr,model)
     return S_h
 
 # Get the baseline for a particualr model
