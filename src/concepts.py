@@ -10,7 +10,8 @@ LISASciRDv1 = {
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'SciDuration' : 4
 }
 
 #LISA CBE
@@ -27,7 +28,8 @@ LISACBE = {
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'SciDuration' : 4
 }
 
 #Twin LISA
@@ -44,7 +46,8 @@ TwinLISA = {
     'Dsep' : 1,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 4
+    'Nindep' : 4,
+    'SciDuration' : 4
 }
 
 #LISA SciRD with low-level noise
@@ -67,7 +70,8 @@ LISASciRDLowLev = {
     'TMsize' : 0.046,
     'TMmat' : 'AuPt',
     'VacuumPressure' : 1e-6,
-    'ACCEL_other_ASD' : [[0],[0]]
+    'ACCEL_other_ASD' : [[0],[0]],
+    'SciDuration' : 4
 }
 
 LISAGrande = {
@@ -83,7 +87,8 @@ LISAGrande = {
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'SciDuration' : 4
 }
 
 # LISA-like mission in Folkner-like orbit
@@ -100,7 +105,8 @@ LISAU = {
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'SciDuration' : 4
 }
 
 #Baseline LISA concept GoBIGLowF
@@ -117,7 +123,8 @@ GoBIGLISA = {
     'OMS_other_ASD' : 10e-12,
     'Lconst' : 5e9,
     'Dsep' : 30,
-    'Nindep' : 4
+    'Nindep' : 4,
+    'SciDuration' : 4
 }
     
 
@@ -137,7 +144,8 @@ GoBIGLowF = {
     'Dsep' : 30,
     'Rorbit' : 0,
     'Torbit' : 0,
-    'Nindep' : 2
+    'Nindep' : 2,
+    'SciDuration' : 4
 }
 
 #Baseline LISA concept GoBIGLowF2
@@ -157,5 +165,6 @@ GoBIGLowF2 = {
     'Torbit' : 0,
     'Nindep' : 2,
     'TMsize' : .46,
-    'TMmat'  : 'W'
+    'TMmat'  : 'W',
+    'SciDuration' : 4
 }
