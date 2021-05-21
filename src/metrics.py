@@ -2,7 +2,11 @@
 
 import numpy as np
 import constants
+<<<<<<< HEAD
 import subsystems
+=======
+import background
+>>>>>>> 055e57c2e22c2a9a3b09cd92b95dca54cd336517
 
 #Probably adapt more for GW Imager concepts 
 def PSD_noise_components(fr, model):
@@ -20,7 +24,6 @@ def PSD_noise_components(fr, model):
     if 'sqSacc_ASD' in model:
         sqSacc_ASD = model.get('sqSacc_ASD') 
         Sa_a = subsystems.F_Noise_PSD(fr,sqSacc_ASD,True)**2
-        #**2 *(1.0 +(0.4e-3/fr)**2)*(1.0+(fr/8e-3)**4)
     else:
         Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instesad of a value
     Sa_d = Sa_a*(2.*np.pi*fr)**(-4.)
@@ -30,7 +33,6 @@ def PSD_noise_components(fr, model):
     if 'sqSoms_ASD' in model:
         sqSoms_ASD = model.get('sqSoms_ASD')
         Soms_d = subsystems.F_Noise_PSD(fr,sqSoms_ASD,True)**2
-        #**2 * (1. + (2.e-3/fr)**4)
     else:
         Soms_d = model.get('sqSoms_func')(fr, model) #Can provide a func based Jeff's calculations
     Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2
