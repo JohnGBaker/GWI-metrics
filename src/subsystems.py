@@ -26,7 +26,7 @@ def OMS_Noise_PSD(fr, model):
     D_Rx          | m           | Receiver mirror diameter (optional, otherwise=D_Tx)
     Responsivity  | A/W         | Photodetector responsivity [need Resp or QE]
     QE            | -           | Ouantum Efficiency [need Resp or QE]
-    OMS_other_PSD | m/sqrt(Hz)  | Other sources of OMS noise to add in quadrature  
+    OMS_other_ASD | m/sqrt(Hz)  | Other sources of OMS noise to add in quadrature  
     '''
     P_Tx=model['P_Tx']
     lambdaOMS=model['lambdaOMS']*1e-9
@@ -51,10 +51,10 @@ def OMS_Noise_PSD(fr, model):
     print('sqSn_shot:',np.sqrt(Sn_shot))
     
     OMS_other=0
-    if 'OMS_other_PSD' in model:OMS_other=model['OMS_other_PSD']
-    OMS_other_PSD = F_Noise_PSD(fr,OMS_other)
+    if 'OMS_other_ASD' in model:OMS_other=model['OMS_other_ASD']
+    OMS_other_ASD = F_Noise_PSD(fr,OMS_other)
     
-    Sn = Sn_shot + OMS_other_PSD**2
+    Sn = Sn_shot + OMS_other_ASD**2
     return Sn
 
 def OMS_received_power(model):
@@ -79,7 +79,7 @@ OBGRSOmega2        | s^-2           | OB/GRS TMx stiffness (?)
 TMsize             | m              | TM linear dimension
 TMmat              |                | TM material composition
 VacuumPressure     | Pa             | Residual gas vacuum presure
-ACCEL_other_PSD    | m/s^2          | Catch-all unknown acceleration noise input
+ACCEL_other_ASD    | m/s^2          | Catch-all unknown acceleration noise input
 '''
 
 def ACC_Noise_PSD(fr, model):
@@ -129,7 +129,7 @@ def ACC_Noise_PSD(fr, model):
     if 'VacuumPressure' in model: VaccumePressure=model.get('VacuumPressure')
     #Margin/misc
     ACCEL_other=0
-    if 'ACCEL_other_PSD' in model:ACCEL_other=model['ACCEL_other_PSD']
+    if 'ACCEL_other_ASD' in model:ACCEL_other=model['ACCEL_other_ASD']
 
     #CALCULATE NOISE TERMS
     ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5
@@ -146,7 +146,7 @@ def ACC_Noise_PSD(fr, model):
     ACC = ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2+Xstiff**2+AO**2
     return ACC
 
-def F_Noise_PSD(fr, pLaws):
+def F_Noise_PSD(fr, pLaws, QUAD=False):
     if (type(pLaws) is int) or (type(pLaws) is float):
         freqPower = [0]
         freqAmp = [pLaws]
@@ -158,12 +158,16 @@ def F_Noise_PSD(fr, pLaws):
     if fMatch > 0: freqAmp += [0]*fMatch
     if fMatch < 0: freqPower += [0]*(-fMatch)
     
-    ii = 0
     outPSD = np.zeros(len(fr))
-    for ii in range(len(freqPower)):
-        for jj in range(len(fr)):
-            outPSD[jj] = outPSD[jj] + freqAmp[ii]*fr[jj]**freqPower[ii]
-        ii += 1
+    if QUAD:
+        for ii in range(len(freqPower)):
+            outPSD += (freqAmp[ii]*fr**freqPower[ii])**2
+            ii += 1
+        outPSD = outPSD**0.5
+    else:
+        for ii in range(len(freqPower)):
+            outPSD += freqAmp[ii]*fr**freqPower[ii]
+            ii += 1
 
     return outPSD
 

@@ -2,6 +2,7 @@
 
 import numpy as np
 import constants
+import subsystems
 
 #Probably adapt more for GW Imager concepts 
 def PSD_noise_components(fr, model):
@@ -16,18 +17,20 @@ def PSD_noise_components(fr, model):
     c=constants.c
     
     ### Acceleration noise
-    if 'sqSacc_level' in model:
-        sqSacc_level = model.get('sqSacc_level') 
-        Sa_a = sqSacc_level**2 *(1.0 +(0.4e-3/fr)**2)*(1.0+(fr/8e-3)**4)
+    if 'sqSacc_ASD' in model:
+        sqSacc_ASD = model.get('sqSacc_ASD') 
+        Sa_a = subsystems.F_Noise_PSD(fr,sqSacc_ASD,True)**2
+        #**2 *(1.0 +(0.4e-3/fr)**2)*(1.0+(fr/8e-3)**4)
     else:
         Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instesad of a value
     Sa_d = Sa_a*(2.*np.pi*fr)**(-4.)
     Sa_nu = Sa_d*(2.0*np.pi*fr/c)**2
 
     ### Optical Metrology System
-    if 'sqSoms_level' in model:
-        sqSoms_level = model.get('sqSoms_level')
-        Soms_d = sqSoms_level**2 * (1. + (2.e-3/fr)**4)
+    if 'sqSoms_ASD' in model:
+        sqSoms_ASD = model.get('sqSoms_ASD')
+        Soms_d = subsystems.F_Noise_PSD(fr,sqSoms_ASD,True)**2
+        #**2 * (1. + (2.e-3/fr)**4)
     else:
         Soms_d = model.get('sqSoms_func')(fr, model) #Can provide a func based Jeff's calculations
     Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2
