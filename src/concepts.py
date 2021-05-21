@@ -56,7 +56,7 @@ LISASciRDLowLev = {
     'lambdaOMS' : 1064,
     'D_Tx' : 0.3,
     'Responsivity' : 0.7,
-    'OMS_other_PSD' : 15e-12,
+    'OMS_other_PSD' : [[15e-12],[0]],
     'Lconst' : 2.5e9,
     'Dsep' : 0,
     'Rorbit' : 1.0,
@@ -67,7 +67,7 @@ LISASciRDLowLev = {
     'TMsize' : 0.046,
     'TMmat' : 'AuPt',
     'VacuumPressure' : 1e-6,
-    'ACCEL_other_PSD' : 0
+    'ACCEL_other_PSD' : [[0],[0]]
 }
 
 LISAGrande = {
