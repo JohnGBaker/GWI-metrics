@@ -300,6 +300,39 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
 
 ### Imaging
 
+def getResolution(obsIn):
+    '''
+    Compute the angular resolution as a function of time for an observation.
+    
+    '''
+    
+    obsOut = obsIn.copy()
+    t = obsOut.get('t')
+    snr = obsOut.get('SNR of t')
+    f = obsOut.get('f')
+    isnr2 = np.clip(np.argmin(np.abs(snr-0.5*snr[-1])),0,len(t)-1)
+    tsnr2 = t[isnr2]
+    fsnr2 = f[isnr2]
+    snr2 = snr[isnr2]
+    obsOut['t half SNR'] = tsnr2
+    obsOut['f half SNR'] = fsnr2
+    
+    # estimate the diffraciton limit
+    lamGW = constants.c / fsnr2
+    B = getBaseline(obsOut.get('model'),t,tsnr2)
+    deltaThetaDiff = (lamGW/constants.c)/B
+    obsOut['Baseline'] = B
+    obsOut['Diffraction Limit'] = deltaThetaDiff
+    
+    # estimate the angular resolution
+    deltaTheta = deltaThetaDiff/snr
+    obsOut['Angular Resolution'] = deltaTheta
+    
+    return obsOut
+    
+
+
+
 def dResRange(fr,model):
     '''
     Here we construct two elementary figures of merit relevant for imaging, relevant for our imaging incoherent and our astrometric notions of imaging. 
