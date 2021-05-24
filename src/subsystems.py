@@ -45,10 +45,10 @@ def OMS_Noise_PSD(fr, model):
     
     Sn_shot=constants.h_planck*constants.c*lambdaOMS**3*L_arm**2/(2*np.pi**2*QE*P_Tx*D_Tx**2*D_Rx**2) #Jeff's formula
     #sqSn_shot=constants.h_planck*constants.c*lambdaOMS**3*L_arm**2/(QE*P_Tx*D_Tx**2*D_Rx**2) #Differs by 2pi to agree with LISA value
-    print('QE:',QE)
+    #print('QE:',QE)
     
-    print('P_Rx:',OMS_received_power(model))
-    print('sqSn_shot:',np.sqrt(Sn_shot))
+    #print('P_Rx:',OMS_received_power(model))
+    #print('sqSn_shot:',np.sqrt(Sn_shot))
     
     OMS_other=0
     if 'OMS_other_ASD' in model:OMS_other=model['OMS_other_ASD']
