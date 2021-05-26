@@ -8,7 +8,7 @@ AmCV = {
     'label' : 'AmCV',
     'm1' : 0.68,               # mass of object 1 in solar masses
     'm2' : 0.125,              # mass of object 2 in solar masses
-    'dkpc' : 0.3,              # luminosity distance (kpc)
+    'dl' : 0.3,              # luminosity distance (kpc)
     'a'  : 0.5*9.5e-4,         # binary separation
 }
 
@@ -27,4 +27,12 @@ MBHB73 = {
     'm1' : 1e7,
     'm2' : 1e7,
     'dl' : constants.z3kpc
+}
+
+GW150914 = {
+    'type' : 'chirp',
+    'label': r'GW150914',
+    'm1' : 36,
+    'm2' : 29,
+    'dl' : 410*1e3
 }
