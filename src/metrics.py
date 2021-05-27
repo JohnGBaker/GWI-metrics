@@ -226,12 +226,12 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
 
             # get the frequency, compute the semi-major axis
             if 'f0' in source:
-                f0 = source.get('f0')
+                f0 = np.array(source.get('f0'))
                 a = (mtot / (np.pi*f0)**2)**(1./3.)
             # get the semi-major axis, compute the frequency
             else:
                 a = source.get('a')*constants.AU
-                f0 = (1./np.pi)*(mtot/(a**3.))**(1./2.)
+                f0 = np.array((1./np.pi)*(mtot/(a**3.))**(1./2.))
 
             # get the luminosity distance
             dl = source.get('dl')*constants.kpc2s
@@ -239,21 +239,25 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
             # compute the ampltiude
             h0 = (2./dl)*(mchirp**(5./3.))*((np.pi*f0)**(2./3.))
 
+        if np.size(T) == 1:
+            T = np.linspace(1,T,Npts)
 
         # compute the SNR
-        rho = getCWsnr(f0,h0,T,model,style)
+        snrt = getCWsnr(f0,h0,T,model,style)
         
-        # copy source to return with computed parameters
-        sourceOut = source.copy()
-        sourceOut['snr'] = rho
-        sourceOut['T'] = T
-        if not('f0' in sourceOut):
-            sourceOut['f0']=f0
+        i10 = np.argmin(np.abs(snrt-10))
+        t10 = T[i10]
         
-        if not('h0' in sourceOut):
-            sourceOut['h0']=h0
-        
-        return rho, sourceOut
+        observation = {
+                'source' : source.copy(),
+                'model' : model.copy(),
+                't' : T,
+                'f' : f0,
+                'h' : h0,
+                'SNR of t' : snrt,
+                'SNR' : snrt[-1],
+                'observation time' : t10
+            }
         
     # chirping source
     elif stype == 'chirp':
@@ -288,17 +292,60 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
                 'observation time' : t10
             }
             
-            return observation
+
             
         
     # unsupported source, maybe need to throw an error/warning
     else: 
         print('Unsupported source type')
-        return -1.0
+        observation = {}
+    
+    
+    return observation
+
+    
     
     
 
 ### Imaging
+
+def getResolution(obsIn):
+    '''
+    Compute the angular resolution as a function of time for an observation.
+    
+    '''
+    
+    obsOut = obsIn.copy()
+    t = obsOut.get('t')
+    snr = obsOut.get('SNR of t')
+    f = obsOut.get('f')
+    isnr2 = np.clip(np.argmin(np.abs(snr-0.5*snr[-1])),0,len(t)-1)
+    tsnr2 = t[isnr2]
+    snr2 = snr[isnr2]
+    
+    if np.size(f)==1:
+        fsnr2 = f
+    else:
+        fsnr2 = f[isnr2]
+    
+    obsOut['t half SNR'] = tsnr2
+    obsOut['f half SNR'] = fsnr2
+    
+    # estimate the diffraciton limit
+    lamGW = constants.c / fsnr2
+    B = getBaseline(obsOut.get('model'),t,tsnr2)
+    deltaThetaDiff = (lamGW/constants.c)/B
+    obsOut['Baseline'] = B
+    obsOut['Diffraction Limit'] = deltaThetaDiff
+    
+    # estimate the angular resolution
+    deltaTheta = deltaThetaDiff/snr
+    obsOut['Angular Resolution'] = deltaTheta
+    
+    return obsOut
+    
+
+
 
 def dResRange(fr,model):
     '''

@@ -154,18 +154,18 @@ def F_Noise_PSD(fr, pLaws, QUAD=False):
         freqPower = pLaws[:][1]
         freqAmp = pLaws[:][0]
             
-    fMatch = len(freqPower) - len(freqAmp)
+    fMatch = np.size(freqPower) - np.size(freqAmp)
     if fMatch > 0: freqAmp += [0]*fMatch
     if fMatch < 0: freqPower += [0]*(-fMatch)
     
-    outPSD = np.zeros(len(fr))
+    outPSD = np.zeros(np.size(fr))
     if QUAD:
-        for ii in range(len(freqPower)):
+        for ii in range(np.size(freqPower)):
             outPSD += (freqAmp[ii]*fr**freqPower[ii])**2
             ii += 1
         outPSD = outPSD**0.5
     else:
-        for ii in range(len(freqPower)):
+        for ii in range(np.size(freqPower)):
             outPSD += freqAmp[ii]*fr**freqPower[ii]
             ii += 1
 
