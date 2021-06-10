@@ -89,12 +89,12 @@ def ACC_Noise_PSD(fr, model):
 
     #INITIALIZE internal functions and values
     MU0 = constants.MU0
-    Sdeltax=(4.5e-6)**2+(75e-6)**2*(1e-4/fr)+(190e-6)**2*(1e-4/fr)**2
-    S_alpha_UC_f1=4E-6**2*(1e-3/fr)
-    S_alpha_UC_f2=50E-6**2*(1e-4/fr)**2
-    S_Mean_B=(8.7e-9)**2*(1+(15e-3/fr)**(4/3))
-    S_x_GRS=(0.3e-9)**2*(1+(1.5e-3/fr)**2)
-    Sx_tm=(0.95e-9)**2*(1+(2e-4/fr)**2)*(1+(fr/8e-3)**4)/(1+(fr/8e-3/(10**0.5))**4);
+    Sdeltax=(4.5e-6)**2+(75e-6)**2*(1e-4/fr)+(190e-6)**2*(1e-4/fr)**2                   #effective single electrode noise
+    S_alpha_UC_f1=4E-6**2*(1e-3/fr)                                                     #Uncorrelated gain fluctuations (1/f)                            
+    S_alpha_UC_f2=50E-6**2*(1e-4/fr)**2                                                 #Uncorrelated gain fluctuations (1/f**2)
+    S_Mean_B=(8.7e-9)**2*(1+(15e-3/fr)**(4/3))                          #Mean of the fluctuating magnetic field of the two X faces of the TM [T^2 Hz^-1]
+    S_x_GRS=(0.3e-9)**2*(1+(1.5e-3/fr)**2)                                              #GRS-OB baseline deformation contribution to x jitter
+    Sx_tm=(0.95e-9)**2*(1+(2e-4/fr)**2)*(1+(fr/8e-3)**4)/(1+(fr/8e-3/(10**0.5))**4);    #TestMass Jitter along x with respect to MOSA
     
     #READ FROM INPUT
     #Test Mass x-axis stiffness
@@ -132,14 +132,14 @@ def ACC_Noise_PSD(fr, model):
     if 'ACCEL_other_ASD' in model:ACCEL_other=model['ACCEL_other_ASD']
 
     #CALCULATE NOISE TERMS
-    ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5
-    ActStab = (3.53925e-21*(S_alpha_UC_f1+S_alpha_UC_f2))**0.5
-    Brownian = Xf*5.0424e-11*TMsize/TMmass*(VacuumPressure**0.5)
-    MagLF = (2*(chi_B/MU0)**2*(4e-14*S_Mean_B))**0.5*TMsize**2/TMmass
-    MagDc = (1/3*(4e-15**2*(1e-4/fr)**2+0.5e-15**2))**0.5
-    StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass
-    TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5
-    Xstiff = (Sx_tm*abs(omegasquarexx)**2)**0.5
+    ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5                           #M**-0.5
+    ActStab = (3.53925e-21*(S_alpha_UC_f1+S_alpha_UC_f2))**0.5              #[]gain fluctuations, should this scale like Act white noise? (it's a force, right?)
+    Brownian = Xf*5.0424e-11*TMsize/TMmass*(VacuumPressure**0.5)            #M**-1 S
+    MagLF = (2*(chi_B/MU0)**2*(4e-14*S_Mean_B))**0.5*TMsize**2/TMmass       #S M**-1
+    MagDc = (1/3*(4e-15**2*(1e-4/fr)**2+0.5e-15**2))**0.5                   #[] ??
+    StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass                      #M**-1 maybe need TMsize scaling?
+    TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5                              #[] no obvious scaling, MSS material need to be included?
+    Xstiff = (Sx_tm*abs(omegasquarexx)**2)**0.5                             #[]TM jitter, should this be mass dependent?
     AO = F_Noise_PSD(fr,ACCEL_other)
 
     #SUM SQUARES
