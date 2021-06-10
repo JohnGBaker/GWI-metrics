@@ -168,3 +168,40 @@ GoBIGLowF2 = {
     'TMmat'  : 'W',
     'SciDuration' : 4
 }
+
+#Baseline ALIA concept
+ALIA = {
+    'label' : 'ALIA',
+    'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
+    'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
+    'Lconst' : 0.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
+}
+
+
+#ALIA low-level concept
+ALIAlowL = {
+    'label' : 'ALIA low level',
+    'Lconst' : 0.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4,
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10,
+    'lambdaOMS' : 1064,
+    'TMxOmega2' : .4*-8e-7, # -8e-7,
+    'OBGRSOmega2' : .4*-7e-7, # -7e-7,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    'OMS_other_ASD' : .5e-12, #10e-12,
+    'VacuumPressure' : 1e-6,
+    'TMsize' : .046*2.5 # .046
+}
+
