@@ -9,3 +9,7 @@ Links for notebooks in CoLab:
 [binaryResolution](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/binaryResolution.ipynb)
 
 [MBHBwaveCheck](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/MBHBwaveCheck.ipynb)
+
+[binaryResolutionSources](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/binaryResolutionSources.ipynb)
+
+[sensitivityPlotter](https://colab.research.google.com/github/JohnGBaker/GWI-metrics/blob/main/Notebooks/sensitivityPlotter.ipynb)
