@@ -21,9 +21,27 @@ NSNS = {
     
 }
 
+NSNS1_1a = {
+    'type' : 'chirp',
+    'label' : 'NS-NS POC 1.1.a',
+    'm1' : 1.5,
+    'm2' : 1.5,
+    'dl' : 230*1e3   # distance is 230Mpc
+    
+}
+
 NSBH = {
     'type' : 'chirp',
     'label' : r'NS-BH @ 1Gpc',
+    'm1' : 10,
+    'm2' : 1.5,
+    'dl' : 1e6   # distance is 1Gpc
+    
+}
+
+NSBH1_2a = {
+    'type' : 'chirp',
+    'label' : r'NS-BH @ 1Gpc (POC 1.2.a)',
     'm1' : 10,
     'm2' : 1.5,
     'dl' : 1e6   # distance is 1Gpc
@@ -39,6 +57,30 @@ SOBH = {
     
 }
 
+SOBH1_3a = {
+    'type' : 'chirp',
+    'label' : r'$30\,M_{\odot}+30\,M_{\odot}\:@\:1\:Gpc$ (POC 1.3.a)',
+    'm1' : 30,
+    'm2' : 30,
+    'dl' : 1e6   # distance is 1Gpc
+    
+}
+
+MBH2_1a = {
+    'type' : 'chirp',
+    'label': r'$10^{6}\,M_{\odot}+10^{6}\,M_{\odot}\:@\:z=1$ (POC 2.1.a)',
+    'm1' : 1e6,
+    'm2' : 1e6,
+    'dl' : constants.z1kpc # z = 1
+}
+
+MBH2_2a = {
+    'type' : 'chirp',
+    'label': r'$5 \times 10^{5}\,M_{\odot}+5 \times 10^{5}\,M_{\odot}\:@\:z=2$ (POC 2.2.a)',
+    'm1' : 5e5,
+    'm2' : 5e5,
+    'dl' : constants.z2kpc # z = 2
+}
 
 MBHB61 = {
     'type' : 'chirp',
@@ -96,6 +138,29 @@ IMBH413 = {
     'dl' : constants.z3kpc
 }
 
+EMRI3_1a = {
+    'type' : 'chirp',
+    'label': r'$10^{8}\,M_{\odot}+100\,M_{\odot}\:@\:z=0.5$ (POC 3.1.a)',
+    'm1' : 1e8,
+    'm2' : 100,
+    'dl' : 2.92e6 # distance is 2.92 Gpc
+}
+
+EMRI3_2a = {
+    'type' : 'chirp',
+    'label': r'$10^{7}\,M_{\odot}+1\,M_{\odot}\:@\:z=0.5$ (POC 3.2.a)',
+    'm1' : 1e7,
+    'm2' : 1,
+    'dl' : 2.92e6 # distance is 2.92 Gpc
+}
+
+EMRI3_3a = {
+    'type' : 'chirp',
+    'label': r'$5 \times 10^{5}\,M_{\odot}+10\,M_{\odot}\:@\:z=1.5$ (POC 3.3.a)',
+    'm1' : 5e5,
+    'm2' : 10,
+    'dl' : 1.22e7 # distance is 12.2 Gpc
+}
 
 MBHB73 = {
     'type' : 'chirp',
@@ -127,4 +192,28 @@ BHB31G = {
     'm1' : 1e3,
     'm2' : 1e3,
     'dl' : 1e6
+}
+
+PSB4_1a = {
+    'type' : 'persistent',
+    'label': r'WDB $0.6\,M_{\odot}+0.6\,M_{\odot}\:@\:z=0.2$ (POC 4.1.a)',
+    'm1' : 0.6,
+    'm2' : 0.6,
+    'dl' : 1e6 # distance is 1 Gpc
+}
+
+PSB4_1b = {
+    'type' : 'persistent',
+    'label': r'WDB $0.6\,M_{\odot}+0.6\,M_{\odot}\:@\:z=0.2$ (POC 4.1.a)',
+    'm1' : 0.6,
+    'm2' : 0.6,
+    'dl' : 1e3 # distance is 1 Mpc
+}
+
+PSB4_2a = {
+    'type' : 'persistent',
+    'label': r'WDB $0.6\,M_{\odot}+0.6\,M_{\odot}\:@\:z=0.2$ (POC 4.1.a)',
+    'm1' : 0.6,
+    'm2' : 0.6,
+    'dl' : 1e3 # distance is 1 Mpc
 }
