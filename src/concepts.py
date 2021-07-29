@@ -182,6 +182,18 @@ ALIA = {
     'SciDuration' : 4
 }
 
+#Twin ALIA concept
+ALIAtwin = {
+    'label' : 'ALIAtwin',
+    'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
+    'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
+    'Lconst' : 0.5e9,
+    'Dsep' : 1,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 4,
+    'SciDuration' : 4
+}
 
 #ALIA low-level concept
 ALIAlowL = {
@@ -203,5 +215,18 @@ ALIAlowL = {
     'OMS_other_ASD' : .5e-12, #10e-12,
     'VacuumPressure' : 1e-6,
     'TMsize' : .046*2.5 # .046
+}
+
+#Baseline DECIGO
+DECIGO = {
+    'label' : 'DECIGO',
+    'sqSacc_ASD' : [[2e-18,.4e-3*2e-18],[0,-1]],
+    'sqSoms_ASD' : [[15e-18,15e-18*4.e-6],[0,-2]],
+    'Lconst' : 10e6,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Dsep' : 1.73,
+    'Nindep' : 6, #not sure how to specify the 4th constellation which is co-located with one of the other three, so skipping it.
+    'SciDuration' : 4
 }
 
