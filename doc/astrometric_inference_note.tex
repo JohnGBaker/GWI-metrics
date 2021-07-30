@@ -1,0 +1,134 @@
+\documentclass[aps,showpacs,12pt,onecolumn,prd,superscriptaddress,nofootinbib]{revtex4}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{ulem}
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand\ud{{\mathrm{d}}}
+\newcommand\uD{{\mathrm{D}}}
+\newcommand\calO{{\mathcal{O}}}
+\newcommand\bfx{\mathbf{x}}
+\newcommand{\ov}[1]{\overline{#1}}
+\newcommand{\ph}[1]{\phantom{#1}}
+\newcommand{\cte}{\mathrm{cte}}
+\newcommand{\nn}{\nonumber}
+\newcommand{\hatk}{\hat{k}}
+\newcommand{\Hz}{\,\mathrm{Hz}}
+\newcommand{\sinc}{\,\mathrm{sinc}}
+\newcommand{\Msol}{M_{\odot}}
+\newcommand{\bsub}{\begin{subequations}}
+\newcommand{\esub}{\end{subequations}}
+\newcommand\betaL{{\beta_{L}}}
+\newcommand\lambdaL{{\lambda_{L}}}
+\newcommand\varphiL{{\varphi_{L}}}
+\newcommand\psiL{{\psi_{L}}}
+\newcommand\C{{\cos(4\psi)}}
+\newcommand\mc{{\mathcal{M}}}
+
+\newcommand{\jgb}[1]{{\color{DarkGreen} #1}}
+
+\begin{document}
+
+\title{Astrometry Inference Note}
+
+\author{John G. Baker}
+\affiliation{Gravitational Astrophysics Laboratory, NASA Goddard Space Flight Center, 8800 Greenbelt Rd., Greenbelt, MD 20771, USA}
+
+
+\date{\today}
+
+\begin{abstract}
+
+This is back of the envelope note on estimating incited GW direction by temporally extended GW observation from a moving platform.
+
+\end{abstract}
+
+\pacs{
+04.80.Nn, % Gravitational wave detectors and experiments
+95.30.Sf, % relativity and gravitation
+95.55.Ym, % Gravitational radiation detectors
+}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+The basic idea is that we want to treat a 'synthetic aperature', but with measurements separated by space \emph{and time}. We need to compare the phases at two different spatial observation points to estimate a wavefront incidence angle. Befor doing so, however we need to first realize a time-transfer of the signals to a common time.  The time-transfer depends on the model of the signal and our measured knowledge of it at each time-separated observation.
+
+For now we consider just two epochs of observation non-overlapping in time, but spatially separated because of the motion of the observatory. For this analysis we neglect any direct information about position from within each observation epoch (eg because of the attenna pattern, or finite instrument size) to focus only on the information gained by the instrument's motion.
+
+\section{Minimally evolving source}
+
+For an nearly monochromatic GW source, the signal model is nearly trivial, we will assume that the signal is monochromatic.
+(An uncertain frequency drift would seem to break this analysis, as degenerate with the linearly computed phase difference
+here, but observing over multiple orbits would break that degeneracy.)
+
+For each epoch $\alpha$ of observation we assume some definition for an epoch-specific reference position $x^i_\alpha$ e.g.
+the mean location of the observatory during that epoch and a similar epoch observation time $t_\alpha$.  Through the
+observation we can estimate the incident wavefront phase $\varphi\alpha(t_\alpha)$
+at that epoch's spacetime reference point.
+We can compare the wavefront phases, by projecting them to some common reference time $t_0$ which we are free to select.
+For a nearly monochromatic wavefront we estimate reference time phase from observation:
+$$
+\varphi_\alpha(t_0)\approx\varphi_\alpha(t_\alpha)+\omega_\alpha(t_\alpha)(t_0-t_\alpha) + \mathcal{O}\left(\frac{t_0-t_\alpha}{T_c}\right)
+$$
+where $\omega_\alpha$ is the signal frequency and $T_c$ is the intrinsic coherence time of the signal.
+We won't have perfect knowledge of the epoch's phase and frequency. These will depend on how precisely these can be
+inferred during the observation epoch, which in turn will also depend on the epoch SNR $\rho_\alpha$.
+
+We estimate the error in the phase at reference time as
+$$
+\left(\delta\varphi_\alpha(t_0)\right)^2\approx\left(\delta\varphi_\alpha(t_\alpha)\right)^2+\left(\delta\omega_\alpha(t_0-t_\alpha)\right)^2. 
+$$
+We approximate that the GW phase information content is uniformly distributed according to SNR within the signal so that we can approximate $\delta\varphi_\alpha(t_\alpha)\approx\bar{\delta\varphi}/(\rho_\alpha)$.  (For a chirping signal it might also be appropriate to make this proportional to $1/\omega_\alpha$.)
+
+The estimate for error in the GW frequency estimate builds on that from the phase.  Suppose we split each epoch into two halves, then estimate
+$$
+\omega_\alpha(t_\alpha)\approx\frac{\varphi_{\alpha R}-\varphi_{\alpha L}}{T_\alpha/2}
+$$
+where $T_\alpha$ is the duration of the epoch. Again, if there is significant chirp during the epoch, more consideration is needed.  Then, again assuming equal distribution of phase info with $\rho$, and uniform accumulation of $\rho^2$ with time we estimate
+$$
+\left(\delta\omega_\alpha(t_\alpha)\right)^2\approx\frac{\left(\bar{\delta\varphi}\right)^2}{T_\alpha/2}\left(\frac{1}{\rho^2_{\alpha R}}+\frac{1}{\rho^2_{\alpha L}}\right).
+$$
+For the non-chirping example, the RHS is optimized when left and right SNRs are each equal to $\rho_\alpha/\sqrt2$.
+$$
+\delta\omega_\alpha(t_\alpha)\approx\sqrt{\frac{8}{\rho^2_\alpha T_\alpha}}\bar{\delta\varphi}
+$$
+
+Now can complete the estimate for the error in the phase at reference time as estimated by the epoch of observation
+$$
+\left(\delta\varphi_\alpha(t_0)\right)^2\approx\left(\frac{\delta\varphi}{\rho_\alpha}\right)^2\left(1 + 8\frac{\left(t_0-t_\alpha\right)^2 }{T_\alpha}\right).
+$$
+
+Now let us construct the angle estimate by comparing the reference phase measurments at epochs $a$ and $b$ between which the constellation has moved by $D=x_b-x_a$. We estimate the triangulation error by
+$$
+\left(\delta\theta\right)^2 \approx \frac{\left(\varphi_b(t_0)\right)^2+\left(\varphi_b(t_0)\right)^2}{D^2}.
+$$
+Note that we have somewhat conservatively added all error terms in quadrature here. It is likely, though, there may be a common-mode phase errors particularly in the first (explicit phase error) term for each epoch.  Degneracy with intrinsic parameters, for instance, could be common mode.  The analysis assumes such error are not included here.  This likely reduces sensitivity to degeneracy.  In the end, we find that the frequency error terms dominate, where we only more subtle common-mode errors would enter.
+If we assume that each epoch's squared SNR is propotional to its duration, then $\rho^2_\alpha=\rho^2(T_\alpha/T)$ where $\rho$ and $T$ are the SNR and duration of the full observation. We thus have
+$$
+\delta\theta\approx\frac{\bar{\delta\varphi}}{D}\left(\frac{T}{T_a}+\frac{T}{T-T_a} + 8\frac{\left(t_0-T_a/2\right)^2}{T^2_a} +8\frac{\left(t_0-(T+T_a)/2\right)^2}{(T-T_a)^2}\right)
+$$
+where we have assumed the epochs are consecutive with epoch $a$ beginning at $t=0$ so $b$ begins at $t=T_a$ and ends at $t=T$. Optimizing, we find minimum error at $T_a=t_0=T/2$, meaning that the minumum error construction is where there are equal durations (and equal SNR) for the two epochs and the phase is compared at the temporal midpoint.  Then,
+$$
+\bar{\delta\theta}\approx20\frac{\bar{\delta\varphi}}{D}.
+$$
+At this optimum, $4/5$ of the estimated comes from the frequency term.
+
+Lastly, a good rough estimate for a good-quality observation is $\bar{\delta\varphi}\approx 1/\rho$, so
+$$
+\bar{\delta\theta}\approx\frac{20}{\rho D}.
+$$
+
+
+\end{document}
