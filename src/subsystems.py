@@ -131,22 +131,53 @@ def ACC_Noise_PSD(fr, model):
     ACCEL_other=0
     if 'ACCEL_other_ASD' in model:ACCEL_other=model['ACCEL_other_ASD']
 
-    #CALCULATE NOISE TERMS
+    # CALCULATE NOISE TERMS
+    # actuation white noise
+    # = sqrt(2./TMmass.*(DCX_DX_GRS1+DCXH_DX_GRS1).*(R_star.*authority_margin.*gamma_c).*S_V)
     ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5                           #M**-0.5
+    
+    # actuation stability noise
+    # = sqrt(R_star.^2.*(gamma_c.^2+(authority_margin.*gamma_c).^2).*(S_alpha_UC_f1+S_alpha_UC_f2));
     ActStab = (3.53925e-21*(S_alpha_UC_f1+S_alpha_UC_f2))**0.5              #[]gain fluctuations, should this scale like Act white noise? (it's a force, right?)
+
+    # Brownian noise
+    # = sqrt(alphanoise.*(1+pi./8).*(TMsize./TMmass).^2.*VacuumPressure.*(512.*H2Omo.*KB.*T_GRS/pi).^0.5)
     Brownian = Xf*5.0424e-11*TMsize/TMmass*(VacuumPressure**0.5)            #M**-1 S
+
+    # Magnetic Low F
+    # = sqrt(2./TMmass.^2.*(chi_B.*TMsize.^2./MU0).^2.*(delta_B2_DC.*S_Mean_B))
     MagLF = (2*(chi_B/MU0)**2*(4e-14*S_Mean_B))**0.5*TMsize**2/TMmass       #S M**-1
+
+    # Magnetic Downconversion
+    # = sqrt(1./3.*(4e-15.^2.*(1e-4./f).^2+0.5e-15.^2))
     MagDc = (1/3*(4e-15**2*(1e-4/fr)**2+0.5e-15**2))**0.5                   #[] ??
+
+    # Stray voltage
+    # = sqrt(1./TMmass.^2.*((DCX_DX_GRS1+DCXH_DX_GRS1)./CTOT.*Nq.*E).^2.*Sdeltax)
     StrayV= (2.42729210509713e-22*Sdeltax)**0.5/TMmass                      #M**-1 maybe need TMsize scaling?
+
+    # Temperature force noise
+    # = sqrt(S_x_GRS).*abs(omegasquareGRSxx)
     TempF = abs(omegasquareGRSxx)*S_x_GRS**0.5                              #[] no obvious scaling, MSS material need to be included?
+
+    # TM x stiffness
+    # = sqrt(Sx_tm.*abs(omegasquarexx).^2)
     Xstiff = (Sx_tm*abs(omegasquarexx)**2)**0.5                             #[]TM jitter, should this be mass dependent?
+
+    # any other noise
     AO = F_Noise_PSD(fr,ACCEL_other)
 
-    #SUM SQUARES
+    # SUM SQUARES
     ACC = ActWN**2+ActStab**2+Brownian**2+MagLF**2+MagDc**2+StrayV**2+TempF**2+Xstiff**2+AO**2
     return ACC
 
 def F_Noise_PSD(fr, pLaws, QUAD=False):
+    # Generate an output array with length equal to that of input frequency axis 'fr'. Output array values are determined by one
+    # or more powerlaws.  If input pLaws is an int or float, then a constant amplitude output at that value is generated.  If
+    # input is a two-element list, then the first element contains one or more amplitudes, and the second element contains the
+    # same number of respective power laws. If the two lists are of different lengths, '0's are padded onto the end, for example
+    # [[1] [0 2]] is the same as [[1 0] [0 2]], in effect [[1] [0]] which is a an array of where every element has the value '1'.
+    
     if (type(pLaws) is int) or (type(pLaws) is float):
         freqPower = [0]
         freqAmp = [pLaws]
