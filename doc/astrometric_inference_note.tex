@@ -112,23 +112,24 @@ $$
 
 Now let us construct the angle estimate by comparing the reference phase measurments at epochs $a$ and $b$ between which the constellation has moved by $D=x_b-x_a$. We estimate the triangulation error by
 $$
-\left(\delta\theta\right)^2 \approx \frac{\left(\varphi_b(t_0)\right)^2+\left(\varphi_b(t_0)\right)^2}{D^2}.
+\left(\delta\theta\right)^2 \approx \frac{\lambda^2\left(\varphi_b(t_0)\right)^2+\left(\varphi_b(t_0)\right)^2}{D^2}
 $$
+where $\lambda$ is the GW wavelength.
 Note that we have somewhat conservatively added all error terms in quadrature here. It is likely, though, there may be a common-mode phase errors particularly in the first (explicit phase error) term for each epoch.  Degneracy with intrinsic parameters, for instance, could be common mode.  The analysis assumes such error are not included here.  This likely reduces sensitivity to degeneracy.  In the end, we find that the frequency error terms dominate, where we only more subtle common-mode errors would enter.
 If we assume that each epoch's squared SNR is propotional to its duration, then $\rho^2_\alpha=\rho^2(T_\alpha/T)$ where $\rho$ and $T$ are the SNR and duration of the full observation. We thus have
 $$
-\delta\theta\approx\frac{\bar{\delta\varphi}}{D}\left(\frac{T}{T_a}+\frac{T}{T-T_a} + 8\frac{\left(t_0-T_a/2\right)^2}{T^2_a} +8\frac{\left(t_0-(T+T_a)/2\right)^2}{(T-T_a)^2}\right)
+\delta\theta\approx\frac{\lambda\bar{\delta\varphi}}{D}\left(\frac{T}{T_a}+\frac{T}{T-T_a} + 8\frac{\left(t_0-T_a/2\right)^2}{T^2_a} +8\frac{\left(t_0-(T+T_a)/2\right)^2}{(T-T_a)^2}\right)
 $$
 where we have assumed the epochs are consecutive with epoch $a$ beginning at $t=0$ so $b$ begins at $t=T_a$ and ends at $t=T$. Optimizing, we find minimum error at $T_a=t_0=T/2$, meaning that the minumum error construction is where there are equal durations (and equal SNR) for the two epochs and the phase is compared at the temporal midpoint.  Then,
 $$
-\bar{\delta\theta}\approx20\frac{\bar{\delta\varphi}}{D}.
+\bar{\delta\theta}\approx20\frac{\lambda\bar{\delta\varphi}}{D}.
 $$
 At this optimum, $4/5$ of the estimated comes from the frequency term.
 
 Lastly, a good rough estimate for a good-quality observation is $\bar{\delta\varphi}\approx 1/\rho$, so
 $$
-\bar{\delta\theta}\approx\frac{20}{\rho D}.
+\bar{\delta\theta}\approx20\frac{\lambda}{\rho D}.
 $$
-
+The factor or 20 is not something we had before.
 
 \end{document}
