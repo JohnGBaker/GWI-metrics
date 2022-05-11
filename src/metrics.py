@@ -42,7 +42,7 @@ def PSD_noise_components(fr, model):
 def AvFXp2_approx(fr,L):
     return 16.*(3./20.)*(1./(1.+0.6*(2.*np.pi*fr*L)**2))
 
-#Components for the Larson computation
+#Components for the Larson computation from LISA TN
 gamma = 60*180/np.pi
 sg = np.sin(gamma)
 cg = np.cos(gamma)
@@ -136,9 +136,9 @@ def getBaseline(model,t=0,tstart=0):
 #Make SNR for continuous-wave source
 def getCWsnr(f0,h0,T,model,style='TN'):
     '''
-    Compute the SNR for a monochromatic GW source based on the source frequency f0, source ampltiude h0, obsertvation time T, and an instrument model.
+    Compute the SNR for a monochromatic GW source based on the source frequency f0, source ampltiude h0, obsertvation time T, and an instrument model. 
     
-    The calculation follows (83) from the LISA-LCST-SGS-TN-001 to compute the inclinaiton, polarization, and sky-position averaged SNR for a monochomatic source:
+    The calculation follows (83) from the LISA-LCST-SGS-TN-001 (https://arxiv.org/abs/2108.01167) to compute the inclinaiton, polarization, and sky-position averaged SNR for a monochomatic source:
     $$
     \left<SNR^2\right>_{\iota,\psi,sky} = 10 \frac{\left(\frac{2}{5}h_0\right)^2T}{S_h\left(f_0\right)}
     $$
@@ -157,13 +157,14 @@ def getCWsnr(f0,h0,T,model,style='TN'):
     return np.sqrt(rho2)
 
 #Make SNR for continuous-wave source
-def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN'):
+def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN',tstop=None):
     '''
     Compute the SNR for a chirping source
     '''
     # set up time vector
     # stop time is when we get to merger frequency / 3 to avoid PN blow-up
-    tstop = chirp.tFromF(0.3*chirp.getFmerge(mtot,eta),mtot,eta)
+    if tstop is None:
+        tstop = chirp.tFromF(0.3*chirp.getFmerge(mtot,eta),mtot,eta)
     tvals = -np.flip(np.logspace(np.log10(-tstop),np.log10(-tstart),Npts))
     
     # get the corresponding frequency vector
@@ -276,7 +277,7 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
             
     
             #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
-            snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style)
+            snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=source.get('timecut',None))
         
             i10 = np.argmin(np.abs(snrt-10))
             t10 = tvals[i10]

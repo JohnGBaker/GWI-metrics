@@ -1,6 +1,7 @@
 #This file provides descriptors for reference GW imager mission concepts.
 import subsystems
 
+
 #Baseline LISA concept
 LISASciRDv1 = {
     'label' : 'LISA(SciRDv1)',
@@ -230,3 +231,5 @@ DECIGO = {
     'SciDuration' : 4
 }
 
+menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,DECIGO'.split(',')
+menu={name:globals()[name] for name in menuNames}    
