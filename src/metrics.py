@@ -115,24 +115,35 @@ def getBaseline(model,t=0,tstart=0):
     The parameter t defines the time(s) at which to evaluate the orbit.
     The parameter tstart is the time at which to start including orbital effects (e.g. after some SNR threshold)
     '''
+
+    # initialize baseline array
+    B = np.zeros_like(t)
     
     # minimum baseline is the detector size
-    B = np.zeros_like(t) + model.get('Lconst')/constants.c
-    
-    # if you have multiple constellations, use the Dsep parameter (which is in what units?)
-    if 'Dsep' in model:
-        Dsep = model.get('Dsep')
-        if Dsep > 0:
-            return Dsep*constants.AU + B
-        
-    # otherwise start using your orbit from tstart
+    Bc = model.get('Lconst')/constants.c
+
+    # start using your orbit from tstart
     istart = np.argmin(np.abs(t-tstart))
     theta = 2*np.pi*np.clip((t[istart:]-t[istart])/(model.get('Torbit')*constants.year),0,0.5)
     Borbit = model.get('Rorbit')*constants.AU*np.sqrt(2*(1-np.cos(theta)))
-    B[istart:]= B[istart:]+Borbit
+    B[istart:]= B[istart:] + Borbit
+
+    # if you have multiple constellations, use the Dsep parameter (which is in what units?)
+    if 'Dsep' in model:
+        Dsep = model.get('Dsep')
+        if Dsep*constants.AU > Bc: # essentially a zero check
+            Bmin = Dsep*constants.AU
+        else:
+            Bmin = Bc
+    else:
+        Bmin = Bc
+
+    # use the greater of the available baselines for each timestep
+    igreater = np.where(B < Bmin)
+    B[igreater] = Bmin
+
     return B
-    
-        
+
 #Make SNR for continuous-wave source
 def getCWsnr(f0,h0,T,model,style='TN'):
     '''
@@ -345,8 +356,6 @@ def getResolution(obsIn):
     
     return obsOut
     
-
-
 
 def dResRange(fr,model):
     '''
