@@ -108,7 +108,7 @@ def ACC_Noise_PSD(fr, model):
 
     # READ PARAMETERS FROM INPUT
     # Test Mass x-axis stiffness
-    omegasquarexx = -8e-7
+    omegasquarexx = -8e-7 #  Ref. PRD 97:122002 + LISA-UTN-INST-TN-003
     if 'TMxOmega2' in model:
         omegasquarexx = model.get('TMxOmega2');
     # OB/GRS TMx stiffness (?)
@@ -198,9 +198,9 @@ def ACC_Noise_PSD(fr, model):
 
     ## Temperature fluctuation noise
     # GRS-OB baseline deformation contribution to x jitter
-    S_x_GRS = (0.3e-9)**2*(1+(1.5e-3/fr)**2)
+    S_x_GRS = (0.3e-9)**2*(1+(1.5e-3/fr)**2) # LISA-UTN-INST-RP-010
     # TestMass Jitter along x with respect to MOSA
-    Sx_tm = (0.95e-9)**2*(1+(2e-4/fr)**2)/(1+(fr/8e-3/(10**0.5))**4);
+    Sx_tm = (0.95e-9)**2*(1+(2e-4/fr)**2)/(1+(fr/8e-3/(10**0.5))**4);# LISA-UTN-INST-TN-006 v1 grav specs analysis
 
     #######################
     # CALCULATE NOISE TERMS
