@@ -104,7 +104,8 @@ def ACC_Noise_PSD(fr, model):
     # INITIALIZE internal functions and values
     MU0 = constants.MU0
     KB = constants.KB
-    H2Omo = constants.H20mo
+    H2Omo = constants.H2Omo
+    e_charge = constants.e_charge
 
     # READ PARAMETERS FROM INPUT
     # Test Mass x-axis stiffness
@@ -208,7 +209,7 @@ def ACC_Noise_PSD(fr, model):
     ## Actuation noises
     # Actuation white noise
     #ActWN = sqrt(2./TMmass.*(DCX_DX_GRS1+DCXH_DX_GRS1).*(R_star.*authority_margin.*gamma_c).*S_V)
-    ActWN = Xf*(2/TMmass.*(DCX_DX_GRS1+DCXH_DX_GRS1)*(R_star*authority_margin*gamma_c)*S_V)**0.5
+    ActWN = Xf*(2/TMmass*(DCX_DX_GRS1+DCXH_DX_GRS1)*(R_star*authority_margin*gamma_c)*S_V)**0.5
     # ActWN = Xf*2.96305934878798e-16/(TMmass)**0.5                           #M**-0.5
 
     # Actuation stability noise
@@ -228,7 +229,7 @@ def ACC_Noise_PSD(fr, model):
     # giving rise to a noisy force acting on the TM. The surface effect is companioned by fluctuations in the electrode potential generated
     # by the Front End Electronics actuation, which will add to the stray voltages.
     # = sqrt(1./TMmass.^2 .* ((DCX_DX_GRS1 + DCXH_DX_GRS1)./CTOT .* Nq .* E).^2.* Sdeltax)
-    StrayV = (1/TMmass^2 * ((DCX_DX_GRS1 + DCXH_DX_GRS1)/CTOT * Nq * E)**2 * Sdeltax)
+    StrayV = (1/TMmass**2 * ((DCX_DX_GRS1 + DCXH_DX_GRS1)/CTOT * Nq * e_charge)**2 * Sdeltax)
     # StrayV = (2.42729210509713e-22*Sdeltax)**0.5/TMmass                      #M**-1 maybe need TMsize scaling?
 
     ## Magnetic noises
@@ -238,7 +239,7 @@ def ACC_Noise_PSD(fr, model):
     # noise from local source of B field fluctuations (still low freq)
     # (just added this because it's comparable to MagLF)
     # Ref. lisa-utn-inst-tn-015 RevMagReqs
-    MAGfluct = 3./TMmass**2*(2*chi B*TMsize**2/MU0)**2 *(Bmax * S_dB_max))**0.5
+    MagFluct = (3./TMmass**2*(2*chi_B*TMsize**2/MU0)**2 *(Bmax * S_dB_max))**0.5
     #  Down-conversion of audio-frequency magnetic fields into a low frequency force, via their coupling with the corresponding induced audio-frequency eddy currents
     # Ref. lisa-utn-inst-tn-015 RevMagReqs
     # = sqrt(1./3.*(4e-15.^2.*(1e-4./f).^2+0.5e-15.^2))
@@ -256,7 +257,7 @@ def ACC_Noise_PSD(fr, model):
     AO = F_Noise_PSD(fr,ACCEL_other)
 
     # SUM SQUARES
-    ACC = ActWN**2 + ActStab**2 + Brownian**2 + MagLF**2 + Magfluct**2 + MagDc**2 + StrayV**2 + TempF**2 + Xstiff**2 + AO**2
+    ACC = ActWN**2 + ActStab**2 + Brownian**2 + MagLF**2 + MagFluct**2 + MagDc**2 + StrayV**2 + TempF**2 + Xstiff**2 + AO**2
     return ACC
 
 def F_Noise_PSD(fr, pLaws, QUAD=False):
