@@ -149,6 +149,7 @@ def getCWsnr(f0,h0,T,model,style='TN'):
     
     # compute sensitivity at the GW frequency from the model
     S_h_f0 = makeSensitivity(f0,model,style)
+    #print('T,f0,S_h_f0',T,f0,S_h_f0)
     
     # apply equation (83)
     rho2 = 10*(((2./5.)*h0)**2)*T/S_h_f0 
@@ -192,7 +193,7 @@ def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN',
     return snrt, tvals, fsnr, hsnr
     
 #Make snr from a source
-def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
+def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  #JGB REVIEW: Seems we need T>0 for CW and T<0 for chirp
     '''
     Compute the SNR given a GW source description and a GW model, both as dictionaries. 
     
@@ -241,13 +242,16 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
             h0 = (2./dl)*(mchirp**(5./3.))*((np.pi*f0)**(2./3.))
 
         if np.size(T) == 1:
-            T = np.linspace(1,T,Npts)
+            T = np.linspace(1,T,Npts)        #JGB REVIEW: What is going on here? Seem to get an array of mostly NANs
 
         # compute the SNR
         snrt = getCWsnr(f0,h0,T,model,style)
+        print('snrt: len,min,max=',len(snrt),min(snrt),max(snrt))
         
         i10 = np.argmin(np.abs(snrt-10))
-        t10 = T[i10]
+        t10 = T[i10]                         #JGB REVIEW: Does this work for low SNR cases?
+        #print('snrt[-1]=',snrt[-1])
+        #print(snrt)
         
         observation = {
                 'source' : source.copy(),
@@ -276,7 +280,7 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
             ds = source.get('dl')*constants.kpc2s
             
     
-            #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
+            print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
             snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=source.get('timecut',None))
         
             i10 = np.argmin(np.abs(snrt-10))
@@ -341,8 +345,8 @@ def getResolution(obsIn):
     
     # estimate the angular resolution
     deltaTheta = deltaThetaDiff/snr
-    obsOut['Angular Resolution'] = deltaTheta
-    
+    obsOut['Angular Resolution of t'] = deltaTheta
+    obsOut['Angular Resolution'] = deltaTheta[-1]
     return obsOut
     
 

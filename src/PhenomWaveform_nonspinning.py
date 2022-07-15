@@ -119,6 +119,36 @@ def binaryAmp(f,M,eta,d=1.0):
 
     return h
 
+# get *just* the amplitude as a function of frequency, total mass, reduced mass ratio, and distance
+def binaryAmpOnly(f,M,eta,d=1.0):
+
+
+    #alpha1
+    fmerg = getFmerge(M,eta)
+
+    fring = getFring(M,eta)
+
+    sigma = (a3*eta**2 +b3*eta + c3)/np.pi/M
+
+    fcut  = getFcut(M,eta)
+
+    # Eq. 4.17
+    C = M**(5.0/6.0)*fmerg**(-7.0/6.0)*np.sqrt(5.0*eta/24.0)/d/np.pi**(2.0/3.0)
+
+    freqs = f
+
+    amp1_vals = AmpLow(freqs,C,fmerg)
+    amp2_vals = AmpMid(freqs,C,fmerg)
+    amp3_vals = AmpHigh(freqs,C,fmerg,fring,sigma)
+
+    f_in_bin1 = freqs < fmerg
+    f_in_bin2 = (freqs >= fmerg) & (freqs < fring)
+    f_in_bin3 = freqs >= fring
+
+    amp_vals = f_in_bin1*amp1_vals + f_in_bin2*amp2_vals + f_in_bin3*amp3_vals
+    
+    return amp_vals
+
 def ThetaFromT(t,M,eta,t_merge=0):
     return (eta/(5*M))*(t_merge - t)
 
@@ -161,3 +191,55 @@ def fFromT(t,M,eta=0.25,t_merge=0):
     fvals = 2.0*omegavals/(2.0*np.pi)
     
     return fvals
+
+# get t(f from phase) t=(1/2pi)*dphase/df
+#John's calc
+def t_of_f(f,M,eta,d=1.0,zero_at_f=0):
+
+    # phase calculation
+    x0 =  1.7516e-1
+    x2 = -5.1571e1
+    x3 =  6.5866e2
+    x4 = -3.9031e3
+    x6 = -2.4874e4
+    x7 =  2.5196e4
+
+    y0 =  7.9483e-2
+    y2 = -1.7595e1
+    y3 =  1.7803e2
+    y4 = -7.7493e2
+    y6 = -1.4892e3
+    y7 =  3.3970e2
+
+    z0 = -7.2390e-2
+    z2 =  1.3253e1
+    z3 = -1.5972e2
+    z4 =  8.8195e2
+    z6 =  4.4588e3
+    z7 = -3.9573e3
+
+    psi0 = (x0*eta**2 + y0*eta + z0)/eta/(np.pi*M)**( (5.0-0)/3.0)
+    psi2 = (x2*eta**2 + y2*eta + z2)/eta/(np.pi*M)**( (5.0-2)/3.0)
+    psi3 = (x3*eta**2 + y3*eta + z3)/eta/(np.pi*M)**( (5.0-3)/3.0)
+    psi4 = (x4*eta**2 + y4*eta + z4)/eta/(np.pi*M)**( (5.0-4)/3.0)
+    psi6 = (x6*eta**2 + y6*eta + z6)/eta/(np.pi*M)**( (5.0-6)/3.0)
+    psi7 = (x7*eta**2 + y7*eta + z7)/eta/(np.pi*M)**( (5.0-7)/3.0)
+
+    t0 = 0.0
+    phi0 = -5400.0
+
+    dphase_vals = 2.0*np.pi*t0
+    dphase_vals = dphase_vals + psi0*f**( (0-5.0)/3.0 -1 )*(0-5.0)/3.0
+    dphase_vals = dphase_vals + psi2*f**( (2-5.0)/3.0 -1 )*(2-5.0)/3.0
+    dphase_vals = dphase_vals + psi3*f**( (3-5.0)/3.0 -1 )*(3-5.0)/3.0
+    dphase_vals = dphase_vals + psi4*f**( (4-5.0)/3.0 -1 )*(4-5.0)/3.0
+    dphase_vals = dphase_vals + psi6*f**( (6-5.0)/3.0 -1 )*(6-5.0)/3.0
+    dphase_vals = dphase_vals + psi7*f**( (7-5.0)/3.0 -1 )*(7-5.0)/3.0
+
+    t=-dphase_vals/2/np.pi
+    if zero_at_f>0: 
+        t0=t_of_f(zero_at_f,M,eta)
+        #print('t0=',t0)
+        t=t-t0
+    
+    return t
