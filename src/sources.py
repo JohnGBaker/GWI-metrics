@@ -217,3 +217,56 @@ PSB4_2a = {
     'm2' : 0.6,
     'dl' : 1e3 # distance is 1 Mpc
 }
+
+
+def get_mtot_eta(source):
+    '''
+    A utility for revtieving mtot and eta from available info in the source. 
+
+    Generally intended for chirping sources.
+    '''
+
+    if 'mtot' in source:
+        mtot = source.get('mtot')*constants.MSun2s
+    else:
+        mtot = (source.get('m1') + source.get('m2'))*constants.MSun2s                    
+    if 'eta' in source:
+        eta = source.get('eta')
+    else:
+        eta = (source.get('m1')*source.get('m2'))/((source.get('m1')+source.get('m2'))**2)
+    return mtot,eta
+
+
+def get_CW_h0_f0(source):
+    '''
+    A small utility for revtieving h0 and f0 from available CW source data.
+    '''
+    
+    if 'h0' in source:
+        # if available just take the frequency and amplitude
+        h0 = source.get('h0')
+        f0 = source.get('f0')
+        
+    else :
+        #compute from source physical params
+
+        # convert to seconds
+        mtot = mtot * constants.MSun2s
+        mchirp = mchirp * constants.MSun2s
+
+        if 'f0' in source:
+            # get the frequency, compute the semi-major axis
+            f0 = np.array(source.get('f0'))
+            a = (mtot / (np.pi*f0)**2)**(1./3.)
+        else:
+            # get the semi-major axis, compute the frequency
+            a = source.get('a')*constants.AU
+            f0 = np.array((1./np.pi)*(mtot/(a**3.))**(1./2.))
+
+        # get the luminosity distance
+        dl = source.get('dl')*constants.kpc2s
+        
+        # compute the ampltiude
+        h0 = (2./dl)*(mchirp**(5./3.))*((np.pi*f0)**(2./3.))
+
+    return h0,f0

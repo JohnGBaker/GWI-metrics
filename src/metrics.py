@@ -2,9 +2,10 @@
 
 import numpy as np
 import constants
-import PhenomWaveform_nonspinning as chirp
+import PhenomWaveform_nonspinning as Phenom
 import subsystems
 import background
+import sources
 
 #Probably adapt more for GW Imager concepts 
 def PSD_noise_components(fr, model):
@@ -176,22 +177,22 @@ def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN',
     # set up time vector
     # stop time is when we get to merger frequency / 3 to avoid PN blow-up
     if tstop is None:
-        tstop = chirp.tFromF(0.3*chirp.getFmerge(mtot,eta),mtot,eta)
+        tstop = Phenom.tFromF(0.3*Phenom.getFmerge(mtot,eta),mtot,eta)
     tvals = -np.flip(np.logspace(np.log10(-tstop),np.log10(-tstart),Npts))
     
     # get the corresponding frequency vector
-    fvals = chirp.fFromT(tvals,mtot,eta)
+    fvals = Phenom.fFromT(tvals,mtot,eta)
     
     # get the corresponding amplitude 
-    hvals = chirp.binaryAmp(fvals,mtot,eta,dl)
+    hvals = Phenom.binaryAmp(fvals,mtot,eta,dl)
     Sh = makeSensitivity(fvals, model)
     snri = 4*np.real(hvals*np.conjugate(hvals)/Sh)
     snrt = np.sqrt(np.cumsum(np.diff(fvals)*snri[1:]))
     tvals = tvals[1:]
     
     # for the total SNR, we integrate over all the frequencies to better sample the waveform
-    fsnr = np.logspace(np.log10(fvals[0]),np.log10(chirp.getFcut(mtot,eta)),Npts)
-    hsnr = chirp.binaryAmp(fsnr,mtot,eta,dl)
+    fsnr = np.logspace(np.log10(fvals[0]),np.log10(Phenom.getFcut(mtot,eta)),Npts)
+    hsnr = Phenom.binaryAmp(fsnr,mtot,eta,dl)
     Shsnr = makeSensitivity(fsnr,model)
     snri = 4*np.real(hsnr*np.conjugate(hsnr)/Shsnr)
     snr = np.sqrt(np.sum(np.diff(fsnr)*snri[1:]))
@@ -393,3 +394,355 @@ def dResRange(fr,model):
     dtheta_long=c/fr/Dlong
     dtheta_short=c/fr/Dshort
     return dtheta_long,dtheta_short
+
+######################################
+## Revised calculations Summer 2022 ##
+######################################
+
+# This is new variation on what was in getChirpSNR above. The part focuses on
+# providing what is needed for the new localization calculations (also for SNR).
+def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_style='TN'):
+    '''
+    source -A dict containing:
+      eta    Unitless reduced mass
+      dl     Luminosity distance in kpc
+    model  -Observatory model
+    tstart -Initial time before coalescence in years (tstart>tstop or tstart<0)
+    Npts   -Number of time samples in output
+    fstop  -highest freq (also reference for t=0) [default=fRingdown, but decreasing for EMRI's]
+    tstop  -a time before 0 at fmerge (a version of merger) to cut the signal
+
+    By comparison with getChirpSNR, this version works a little differently.
+    Some changes are to support using the full signal through merger. 
+    Previously, the fFromT function was a PN expression which didn't support 
+    merger. Instead we detive t_of_f (a new function in Phenom) directly from
+    the model phase. (See FoundationCalcs notebook for some tests of that.
+    This is only defined in the f->t direction, so this version differs in 
+    that the grid is explicitly defined in f, with t derived. By default the 
+    frequency terminates at ringdown (for comparable masses).  
+
+    For more extreme mass ratios, the models nere fail at high frequencies 
+    (which also are not usually relevant with insufficient signal power.)
+    It would be natural to terminate EMRI inspirals at ISCO.  Here we just pick
+    0.3Fmerge (which was used in the previous code.  There is a blending
+    to transition between these terminal frequencies based on mass ratio.
+
+    A consequence of the grid being implicit in time is that we cannot direct
+    impose a stop time.  Instead we have a search for the latest f,t sample
+    which does not exceed th desired cutoff.  We have implemented a search 
+    scheme, but the result is approximate, depending on the grid density.
+    '''
+
+    mtot,eta=sources.get_mtot_eta(source)
+    dl = source.get('dl')*constants.kpc2s
+    tstart = tstart*constants.year
+    fmerge=Phenom.getFmerge(mtot,eta)
+    if fstop is None:
+        fring=1.0*Phenom.getFring(mtot,eta)
+        fcut_emri=0.3*fmerge
+        blend=eta/(eta+.05)
+        fstop=fring-(1-blend)*(fring-fcut_emri)
+        #print('fstop=',fstop)
+    else:
+        fstop=fstop
+    
+    fstart=Phenom.fFromT(tstart,mtot,eta)
+    
+    #print('tstart =',tstart,fstart,'< f <',fstop)
+    fvals=np.logspace(np.log10(fstart),np.log10(fstop),Npts)
+    tvals=Phenom.t_of_f(fvals,mtot,eta,zero_at_f=fmerge)
+    
+    #implement a stop time
+    if tstop is not None:
+        tstop=tstop*constants.year
+        #we search for the closest cut point in the time series
+        ncut=find_ncut(times,tstop)
+        tvals=tvals[:-ncut]
+        fvals=fvals[:-ncut]
+    
+    # get the corresponding amplitude 
+    hvals = Phenom.binaryAmpOnly(fvals,mtot,eta,dl)
+    Sh = makeSensitivity(fvals, model, style=resp_style)
+    #snri = 4*np.real(hvals*np.conjugate(hvals)/Sh)
+    snri = 4*(hvals**2/Sh)
+    #snrt = np.sqrt(np.cumsum(np.diff(fvals)*snri[1:]))
+    tvals = tvals[1:]
+    #snri=np.concatenate(([0],snri))
+    return [tvals,fvals,snri,Sh]
+
+def find_ncut(times,tstop):
+    '''
+    Find the number of elements to cut from the end so that the remaining values have time<=tstop.  Assumes monotonicity in the relevant range.
+    '''
+
+    #we search for the closest cut point in the time series
+    ncut=0
+    stepfac=4
+    step=stepfac**4
+    #count=0
+    while step>0:
+        #print('step=',step)
+        while (ncut+step)<len(times)-1 and times[-(ncut+step)]>=tstop: 
+            ncut+=step
+            #print('ncut=',ncut)
+            #count+=1
+        step=step//stepfac
+    #print('found ncut=',ncut,'in',count,'  ',tvals[-(ncut+1)],'<=',tstop,tvals[-ncut])
+    return ncut
+
+def get_rho2om2(chirp):
+    tvals,fvals,snri,Sh=chirp
+    f=fvals[1:]
+    return np.sum(np.diff(fvals)*snri[1:]*f**2)*4*np.pi**2
+
+#Compute the sky-angle resolution for a chirping signal
+def get_chirp_snr_sky_sigma2_orbit(chirp,model):
+    tvals,fvals,snri,Sh=chirp
+    f=fvals[1:]
+    df=np.diff(fvals)
+    t=tvals
+    wt=snri[1:]*f**2
+    i0=np.argmax(wt)
+    fac=sum(df*wt)
+    wt*=df/fac
+    fac=fac*4*np.pi**2
+    t0=t[i0]
+    if 0:
+        wt2=snri[1:]*(2*np.pi*f)**2*np.diff(fvals)
+        fac2=sum(wt2)
+        wt2/=fac2
+        i0=np.argmax(wt2)
+        t0=t[i0]
+    #print('get_...orbit:t0=',t0,'fac=',fac)
+    R=model['Rorbit']*constants.AU
+    Om=2*np.pi/(model['Torbit']*constants.year)
+    tau=t+R*np.sin(Om*t)
+    gam=+R*np.cos(Om*t)
+    tauav=sum(wt*tau)
+    gamav=sum(wt*gam)
+    tau-=tauav
+    gam-=gamav
+    #print('get_...orbit:tauav,gamav',tauav,gamav)
+    I11=sum(wt*tau**2)
+    I12=sum(wt*tau*gam)
+    I22=sum(wt*gam**2)
+    sig2=1/fac/(I22-I12**2/I11)
+    #print('get_...orbit:I11,I12,I22,sig2',I11,I12,I22,sig2)
+    rho2=np.sum(df*snri[1:])
+    #rho2om2=np.sum(df*snri[1:]*f**2)*4*np.pi**2
+    res={'sig2':sig2,'rho2':rho2,'rho2om2':fac}
+    return res
+
+def get_CW_sky_res_orbit(f0,h0,rho, model):
+    '''
+    Compute CW sky angle variance via orbial motion using simplified 
+    Fisher-based formulation.
+    
+    See FomulationCalcs notebook for derivation.  Note that the SNR rho may be
+    provided as a value or an nd.array.
+    '''
+    R=model['Rorbit']*constants.AU
+    Om=2*np.pi/(model['Torbit']*constants.year)
+    rhoom=2*pi*f0*rho
+    sig2=2/(R*rhoom)**2
+    return sig2
+
+def get_sky_sigma2_Lconst(rho2om2,model):
+    '''
+    Compute sky angle variance via constellation size using simplified 
+    Fisher-based formulation.
+    
+    See FomulationCalcs notebook for derivation.  The same formula applies
+    for CW and chirping sources. Note that the rho2om2 may be provided as 
+    a value or an nd.array.
+    '''
+    R=model['Rorbit']*constants.AU
+    Om=2*np.pi/(model['Torbit']*constants.year)
+    L=model['Lconst']/constants.c
+    return 4/rho2om2/L**2     
+
+def get_sky_sigma2_Dsep(rho2om2,model):
+    '''
+    Compute sky angle variance via constellation size using simplified 
+    Fisher-based formulation.
+    
+    See FomulationCalcs notebook for derivation.  The same formula applies
+    for CW and chirping sources. Note that the rho2om2 may be provided as 
+    a value or an nd.array and that 'rho' here is for the total, not for 
+    each constellation.  This formula assumes that each constellation has
+    the same sensitivity.
+    '''
+    R=model['Rorbit']*constants.AU
+    Om=2*np.pi/(model['Torbit']*constants.year)
+    Dsep=model.get('Dsep',0)/constants.c
+    return 4/rho2om2/Dsep**2   
+
+def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp_style='TN',SNRdetect=10,SNRcut=1):  
+    '''
+    Compute the SNR and angular sky resolution for an observation, applying 
+    the method appropriate for the source type.
+
+    Args:
+      source       Source descriptor dict
+      model        Concept descriptor dict
+      Nsamp        Number of time/freq samples to include in output grid.
+      Nres         Number of samples to use in resolving chirp signals
+      Tmax         Maximum observation duration (yr). For chirps, this 
+                   specifies the approximate start time before merger. 
+      style        Style option for response calculation.
+      SNRdetect    Starting SNR from which to estimate detection
+      SNRcut       Force sig->2pi as SNR->SNRcut, small SNR cases
+    
+    If Nsamp>1, then result includes nd.array with a grid of computations for 
+    multiple durations of observation. The grid is chosen appropriately for 
+    the source type.
+    '''
+    
+    stype = source.get('type')
+    
+    observation = {
+        'source' : source.copy(),
+        'model' : model.copy()
+    }
+    
+    if stype == 'CW':
+        # continuous-wave source
+        
+        h0, f0 = get_CW_h0_f0(source)
+
+        if Tmax is None: Tmax=100
+        Tdur=min([Tmax,model.get('SciDuration',Tmax)])
+
+        if Nsamp>0:
+            #Create a time grid uniformly spaced in sqrt(t), not including 0
+            t = np.linspace(0,np.sqrt(Tdur),Npts+1)[1:]**2
+        else:
+            t=Tdur
+        f=f0
+        snr = getCWsnr(f0,h0,t,model,style)
+        rho2om2= snr**2*(2*no.pi*f0)
+        sig2orb=get_CW_sky_res_orbit(f0,h0,shr, model)
+
+        observation['f']=f0
+        observation['h']=h0
+
+        
+    elif stype == 'chirp':
+        # chirping source
+
+        #First specify the relevant time period
+        Tdur=Tmax
+        Tdur=min((Tdur,model.get('SciDuration',Tdur)))
+        tstart=-Tdur
+        #print('Tdur',Tdur,'tstart',tstart)
+        
+        tstop_source=source.get('timecut',None)
+        if tstop_source is not None: tstop_source*=-1
+        
+        #Make first pass on chirp, based on source
+        tvals,fvals,snri,Sh=computeChirp(source,model,tstart=tstart,Npts=Nres,fstop=None,tstop=tstop_source,resp_style=resp_style)
+
+        #print('initial chirp:',tvals,fvals,snri,Sh)
+        #Now refine for model observation period
+        if len(tvals) < Nres/2:
+            print('Recomputing chirp because net resolution is low.',len(tvals),'<',Nres/2)
+            #Under-resolved so we will redo the chirp
+            #first find the cutoff freq
+            fstop=fvals[-ncut]*1.02 #add 2% as buffer
+            #compute the net stop time
+            #redo the chirp only up to cutoff freq
+            tvals,fvals,snri,Sh=computeChirp(source,model,tstart=1,Npts=Nres,fstop=fstop,tstop=tstop_source,resp_style=resp_style)
+            #print('recomputed chirp:',tvals,fvals,snri,Sh)
+        
+        chirp=tvals,fvals,snri,Sh
+        #print(chirp)
+        
+        if Nsamp>0:
+            #set up arrays for output
+            snr=np.zeros(Nsamp)
+            t=np.zeros(Nsamp)
+            f=np.zeros(Nsamp)
+            rho2om2=np.zeros(Nsamp)
+            sig2orb=np.zeros(Nsamp)
+            #set the final values to correspond to the full signal
+            res=get_chirp_snr_sky_sigma2_orbit(chirp,model)
+            t[-1]=tvals[-1]
+            f[-1]=fvals[-1]
+            snr[-1]=np.sqrt(res['rho2'])
+            rho2om2[-1]=res['rho2om2']
+            sig2orb[-1]=res['sig2']
+            
+            #Create a log-uniform output time grid
+            tcuts = -np.flip(np.logspace(np.log10(max([100,-tvals[-1]])),np.log10(-tvals[2]),Nsamp-1))
+            #Fill in grid
+            for i in range(Nsamp-1):
+                #first trim the chirp
+                tcut=tcuts[i]
+                ncut=find_ncut(tvals,tcut)
+                chirp=tvals[:-ncut],fvals[:-ncut],snri[:-ncut],Sh[:-ncut]
+                res=get_chirp_snr_sky_sigma2_orbit(chirp,model)
+                t[i]=chirp[0][-1]
+                f[i]=chirp[1][-1]
+                snr[i]=np.sqrt(res['rho2'])
+                rho2om2[i]=res['rho2om2']
+                sig2orb[i]=res['sig2']
+        else:
+            #single sample chirp
+            #print('chirp:',chirp[0][0],'< t <',chirp[0][-1],' range',(chirp[0][-1]-chirp[0][0])/constants.year,'yr  ',chirp[1][0],'< f <',chirp[1][-1])
+            res=get_chirp_snr_sky_sigma2_orbit(chirp,model)
+            #print('res')
+            #display(res)
+            t=tvals[-1]
+            f=fvals[-1]
+            snr=np.sqrt(res['rho2'])
+            rho2om2=res['rho2om2']
+            sig2orb=res['sig2']
+            
+        #completion of chirp info
+        observation['f']=f
+    else: 
+        print('Unsupported source type')
+
+    #Now, for both CW and chirping,
+    #compute the constellation and separation contirbutions to resolution
+    sig2con=get_sky_sigma2_Lconst(rho2om2,model)
+    sig2sep=get_sky_sigma2_Dsep(rho2om2,model)
+    #Assemble the total adding in quadrature
+    sig2=(sig2orb**-1+min(sig2con,sig2sep)**-1)**-1
+    if SNRcut is not None:
+        sig2+=4*np.pi**2/(1+(snr/SNRcut)**4)
+    sig=np.sqrt(sig2)
+
+    if Nsamp>0:
+        idet = np.argmin(np.abs(snr-SNRdetect))
+        if snr(idet)>=SNRdetect:
+            tdet = T[idet]
+            observation['detection time']=tdet                            
+        observation['SNR of t']=snr
+        observation['Angular Resolution of t'] = sig
+        snr=snr[-1]
+        sig=sig[-1]
+        observation['Angle Variance (orbit) of t'] = sig2orb
+        observation['Angle Variance (const) of t'] = sig2con
+        observation['Angle Variance (sep) of t'] = sig2sep
+        observation['Effective omega of t'] = np.sqrt(rho2om2)/snr
+        observation['Effective D of t'] = 4/rho2om2/sig**2
+        sig2orb=sig2orb[-1]
+        sig2con=sig2con[-1]
+        sig2sep=sig2sep[-1]
+        rho2om2=rho2om2[-1]
+    observation['t']=t
+    observation['SNR']=snr
+    observation['Angular Resolution'] = sig
+    observation['Angle Variance (orbit)'] = sig2orb
+    observation['Angle Variance (const)'] = sig2con
+    observation['Angle Variance (sep)'] = sig2sep
+    observation['Effective omega'] = np.sqrt(rho2om2)/snr
+    observation['Effective D'] = 4/rho2om2/sig**2
+    
+    return observation
+
+    
+    
+    
+
