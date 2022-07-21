@@ -123,11 +123,16 @@ def getBaseline(model,t=0,tstart=0):
     # minimum baseline is the detector size
     Bc = model.get('Lconst')/constants.c
 
-    # start using your orbit from tstart
-    istart = np.argmin(np.abs(t-tstart))
-    theta = 2*np.pi*np.clip((t[istart:]-t[istart])/(model.get('Torbit')*constants.year),0,0.5)
-    Borbit = model.get('Rorbit')*constants.AU*np.sqrt(2*(1-np.cos(theta)))
-    B[istart:]= B[istart:] + Borbit
+    haveOrbit=False
+    if 'Torbit' in model and 'Rorbit' in model and not np.isnan(tstart):
+        haveOrbit=True
+        # start using your orbit from tstart
+        istart = np.argmin(np.abs(t-tstart))
+        theta = 2*np.pi*np.clip((t[istart:]-t[istart])/(model.get('Torbit')*constants.year),0,0.5)
+        Borbit = model.get('Rorbit')*constants.AU*np.sqrt(2*(1-np.cos(theta)))
+        B[istart:]= B[istart:] + Borbit
+        if np.isnan(sum(B)):
+            print('Got ',np.count_nonzero(np.isnan(B)),' NaNs (out of',len(B),' for orbit baseline. istart',istart,' tstart',tstart)
 
     # if you have multiple constellations, use the Dsep parameter (which is in what units?)
     if 'Dsep' in model:
@@ -139,9 +144,12 @@ def getBaseline(model,t=0,tstart=0):
     else:
         Bmin = Bc
 
-    # use the greater of the available baselines for each timestep
-    igreater = np.where(B < Bmin)
-    B[igreater] = Bmin
+    if haveOrbit:
+        # use the greater of the available baselines for each timestep
+        igreater = np.where(B < Bmin)
+        B[igreater] = Bmin
+    else:
+        B=Bmin
 
     return B
 
@@ -339,6 +347,8 @@ def getResolution(obsIn):
     isnr2 = np.clip(np.argmin(np.abs(snr-0.5*snr[-1])),0,len(t)-1)
     tsnr2 = t[isnr2]
     snr2 = snr[isnr2]
+    if(np.isnan(tsnr2)):
+        print('tsnr2 is nan. snr=',snr[-1],'isnr2=',isnr2)
     
     if np.size(f)==1:
         fsnr2 = f
@@ -479,15 +489,15 @@ def find_ncut(times,tstop):
     ncut=0
     stepfac=4
     step=stepfac**4
-    #count=0
+    count=0
     while step>0:
         #print('step=',step)
         while (ncut+step)<len(times)-1 and times[-(ncut+step)]>=tstop: 
             ncut+=step
             #print('ncut=',ncut)
-            #count+=1
+            count+=1
         step=step//stepfac
-    #print('found ncut=',ncut,'in',count,'  ',tvals[-(ncut+1)],'<=',tstop,tvals[-ncut])
+    #print('found ncut=',ncut,'in',count,'  ',times[-(ncut+1)],'<=',tstop,times[-ncut])
     return ncut
 
 def get_rho2om2(chirp):
@@ -502,6 +512,9 @@ def get_chirp_snr_sky_sigma2_orbit(chirp,model):
     df=np.diff(fvals)
     t=tvals
     wt=snri[1:]*f**2
+    if len(wt)<1:
+        print('get_chirp_snr_sky_sigma2_orbit: Empty chirp, returning NaNs')
+        return {'sig2':float('nan'),'rho2':float('nan'),'rho2om2':float('nan')}
     i0=np.argmax(wt)
     fac=sum(df*wt)
     wt*=df/fac
@@ -679,7 +692,18 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
                 #first trim the chirp
                 tcut=tcuts[i]
                 ncut=find_ncut(tvals,tcut)
-                chirp=tvals[:-ncut],fvals[:-ncut],snri[:-ncut],Sh[:-ncut]
+                if ncut>=len(tvals):
+                    t[i]=float('nan')
+                    f[i]=float('nan')              
+                    snr[i]=float('nan')
+                    rho2om2[i]=float('nan')
+                    sig2orb[i]=float('nan')
+                    continue
+                if ncut>0:
+                    chirp=tvals[:-ncut],fvals[:-ncut],snri[:-ncut],Sh[:-ncut]
+                else:
+                    chirp=tvals,fvals,snri,Sh
+                #print(len(tvals),ncut,len(chirp[0]))
                 res=get_chirp_snr_sky_sigma2_orbit(chirp,model)
                 t[i]=chirp[0][-1]
                 f[i]=chirp[1][-1]
@@ -708,15 +732,17 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
     sig2con=get_sky_sigma2_Lconst(rho2om2,model)
     sig2sep=get_sky_sigma2_Dsep(rho2om2,model)
     #Assemble the total adding in quadrature
-    sig2=(sig2orb**-1+min(sig2con,sig2sep)**-1)**-1
+    sig2=(sig2orb**-1+np.minimum(sig2con,sig2sep)**-1)**-1
     if SNRcut is not None:
         sig2+=4*np.pi**2/(1+(snr/SNRcut)**4)
     sig=np.sqrt(sig2)
 
     if Nsamp>0:
+        #print('t',t)
+        #print('SNR',snr)
         idet = np.argmin(np.abs(snr-SNRdetect))
-        if snr(idet)>=SNRdetect:
-            tdet = T[idet]
+        if snr[idet]>=SNRdetect:
+            tdet = t[idet]
             observation['detection time']=tdet                            
         observation['SNR of t']=snr
         observation['Angular Resolution of t'] = sig
