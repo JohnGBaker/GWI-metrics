@@ -1,6 +1,6 @@
 # This file defines fiducial sources for GW imaging metric calculaitons
 import constants
-
+import numpy as np
 
 # Parameters for AmCV taken from CLHT demo
 AmCV = {
@@ -249,6 +249,16 @@ def get_CW_h0_f0(source):
         
     else :
         #compute from source physical params
+        # get the chirp mass, first we try chirp mass directlycomponent masses
+        if 'mchirp' in source:
+            mchirp = source.get('mchirp')
+            mtot = source.get('mtot')
+        # failing that, we try the component masses
+        else:
+            m1 = source.get('m1')
+            m2 = source.get('m2')
+            mchirp = ((m1*m2)**(2./5.))/((m1+m2)**(1./5.))
+            mtot = m1+m2
 
         # convert to seconds
         mtot = mtot * constants.MSun2s

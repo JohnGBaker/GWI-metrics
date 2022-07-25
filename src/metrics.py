@@ -86,6 +86,9 @@ def makeSensitivity(fr, model,style='TN'):
     = \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
     { \left( \omega L \right)^2  <(F^{+}_{X})^2>  }
     '''
+    #print('makeSens:',fr[0],'< f <',fr[-1],'style=',style, 'model:')
+    #display(model)
+    
     [Sa_nu,Soms_nu] = PSD_noise_components(fr, model)
     L=model.get('Lconst')
     N=model.get('Nindep')
@@ -213,7 +216,7 @@ def getChirpSNR(mtot,eta,dl,model,tstart=-constants.year,Npts = 1000,style='TN',
     return snrt, tvals, fsnr, hsnr
     
 #Make snr from a source
-def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  #JGB REVIEW: Seems we need T>0 for CW and T<0 for chirp
+def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  
     '''
     Compute the SNR given a GW source description and a GW model, both as dictionaries. 
     
@@ -223,6 +226,9 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  #J
     stype = source.get('type')
     # continuous-wave source
     if stype == 'CW':
+
+        #T needs to be positive
+        T=abs(T)
         
         # just do the frequency and amplitude
         if 'h0' in source:
@@ -266,7 +272,7 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  #J
 
         # compute the SNR
         snrt = getCWsnr(f0,h0,T,model,style)
-        print('snrt: len,min,max=',len(snrt),min(snrt),max(snrt))
+        #print('snrt: len,min,max=',len(snrt),min(snrt),max(snrt))
         
         i10 = np.argmin(np.abs(snrt-10))
         t10 = T[i10]                         #JGB REVIEW: Does this work for low SNR cases?
@@ -286,6 +292,10 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  #J
         
     # chirping source
     elif stype == 'chirp':
+        
+            #T needs to be negative
+            T=-abs(T)
+        
             # get the total mass
             if 'mtot' in source:
                 mtot = source.get('mtot')*constants.MSun2s
@@ -300,7 +310,7 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):  #J
             ds = source.get('dl')*constants.kpc2s
             
     
-            print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
+            #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
             snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=source.get('timecut',None))
         
             i10 = np.argmin(np.abs(snrt-10))
@@ -411,7 +421,7 @@ def dResRange(fr,model):
 
 # This is new variation on what was in getChirpSNR above. The part focuses on
 # providing what is needed for the new localization calculations (also for SNR).
-def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_style='TN'):
+def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_style='TN',fstart=None):
     '''
     source -A dict containing:
       eta    Unitless reduced mass
@@ -421,6 +431,7 @@ def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_
     Npts   -Number of time samples in output
     fstop  -highest freq (also reference for t=0) [default=fRingdown, but decreasing for EMRI's]
     tstop  -a time before 0 at fmerge (a version of merger) to cut the signal
+    fstart If present, this overrides tstart
 
     By comparison with getChirpSNR, this version works a little differently.
     Some changes are to support using the full signal through merger. 
@@ -449,24 +460,37 @@ def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_
     fmerge=Phenom.getFmerge(mtot,eta)
     if fstop is None:
         fring=1.0*Phenom.getFring(mtot,eta)
-        fcut_emri=0.3*fmerge
+        fcut_emri=Phenom.getFisco(mtot,eta)
         blend=eta/(eta+.05)
         fstop=fring-(1-blend)*(fring-fcut_emri)
         #print('fstop=',fstop)
     else:
         fstop=fstop
-    
-    fstart=Phenom.fFromT(tstart,mtot,eta)
-    
-    #print('tstart =',tstart,fstart,'< f <',fstop)
+
+    fstartin=fstart
+    if fstart is None:
+        fstart=Phenom.fFromT(tstart,mtot,eta)*0.95 #coarse estimate
+        if np.isnan(fstart): fstart=1e-6
+        print('rough tstart =',tstart,fstart,'< f <',fstop)
+        fvals=np.logspace(np.log10(fstart),np.log10(fstop),Npts)
+        #print('fstop,fmerge,fring',fstop,fmerge,fring)
+        tvals=Phenom.t_of_f(fvals,mtot,eta,zero_at_f=fmerge)
+        #Now trim to fine-tune start
+        ncut=find_ncut(tvals,tstart,-1)
+        tvals=tvals[ncut:]
+        fvals=fvals[ncut:]
+        fstart=fvals[0]
+        print('ncut=',ncut, 'n=',len(tvals))
     fvals=np.logspace(np.log10(fstart),np.log10(fstop),Npts)
     tvals=Phenom.t_of_f(fvals,mtot,eta,zero_at_f=fmerge)
+    print('tstart =',tstart,'t[0]=',tvals[0],fstart,'< f <',fstop)
+    
     
     #implement a stop time
     if tstop is not None:
         tstop=tstop*constants.year
         #we search for the closest cut point in the time series
-        ncut=find_ncut(times,tstop)
+        ncut=find_ncut(tvals,tstop)
         tvals=tvals[:-ncut]
         fvals=fvals[:-ncut]
     
@@ -480,24 +504,30 @@ def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_
     #snri=np.concatenate(([0],snri))
     return [tvals,fvals,snri,Sh]
 
-def find_ncut(times,tstop):
+def find_ncut(times,tstop,sign=1):
     '''
     Find the number of elements to cut from the end so that the remaining values have time<=tstop.  Assumes monotonicity in the relevant range.
     '''
-
+    verbose=False
     #we search for the closest cut point in the time series
+    if verbose: print("looking for t=",tstop,"in [",times[0],",",times[-1],"]")
     ncut=0
     stepfac=4
     step=stepfac**4
     count=0
     while step>0:
-        #print('step=',step)
-        while (ncut+step)<len(times)-1 and times[-(ncut+step)]>=tstop: 
+        if verbose:
+            print('step=',step)
+            if (ncut+step)<(len(times)-1): print('ttest:',times[-sign*(ncut+step)],'tlimit',tstop,'-->',times[-sign*(ncut+step)]*sign>=tstop*sign)
+        while (ncut+step)<(len(times)-1) and times[-sign*(ncut+step)]*sign>=tstop*sign: 
             ncut+=step
-            #print('ncut=',ncut)
+            if verbose: print('ncut=',ncut)
             count+=1
+            if verbose:
+                if (ncut+step)<(len(times)-1): print('ttest:',times[-sign*(ncut+step)],'tlimit',tstop,'-->',times[-sign*(ncut+step)]*sign>=tstop*sign)
+
         step=step//stepfac
-    #print('found ncut=',ncut,'in',count,'  ',times[-(ncut+1)],'<=',tstop,times[-ncut])
+    if verbose: print('found ncut=',ncut,'in',count,'  ',times[-(ncut+1)],'<=',tstop,times[-ncut])
     return ncut
 
 def get_rho2om2(chirp):
@@ -520,26 +550,24 @@ def get_chirp_snr_sky_sigma2_orbit(chirp,model):
     wt*=df/fac
     fac=fac*4*np.pi**2
     t0=t[i0]
-    if 0:
-        wt2=snri[1:]*(2*np.pi*f)**2*np.diff(fvals)
-        fac2=sum(wt2)
-        wt2/=fac2
-        i0=np.argmax(wt2)
-        t0=t[i0]
     #print('get_...orbit:t0=',t0,'fac=',fac)
-    R=model['Rorbit']*constants.AU
-    Om=2*np.pi/(model['Torbit']*constants.year)
-    tau=t+R*np.sin(Om*t)
-    gam=+R*np.cos(Om*t)
-    tauav=sum(wt*tau)
-    gamav=sum(wt*gam)
-    tau-=tauav
-    gam-=gamav
-    #print('get_...orbit:tauav,gamav',tauav,gamav)
-    I11=sum(wt*tau**2)
-    I12=sum(wt*tau*gam)
-    I22=sum(wt*gam**2)
-    sig2=1/fac/(I22-I12**2/I11)
+    haveOrbit=False
+    if 'Rorbit' in model and 'Torbit' in model:
+        R=model['Rorbit']*constants.AU
+        Om=2*np.pi/(model['Torbit']*constants.year)
+        tau=t+R*np.sin(Om*t)
+        gam=+R*np.cos(Om*t)
+        tauav=sum(wt*tau)
+        gamav=sum(wt*gam)
+        tau-=tauav
+        gam-=gamav
+        #print('get_...orbit:tauav,gamav',tauav,gamav)
+        I11=sum(wt*tau**2)
+        I12=sum(wt*tau*gam)
+        I22=sum(wt*gam**2)
+        sig2=1/fac/(I22-I12**2/I11)
+    else:
+        sig2=float('inf')
     #print('get_...orbit:I11,I12,I22,sig2',I11,I12,I22,sig2)
     rho2=np.sum(df*snri[1:])
     #rho2om2=np.sum(df*snri[1:]*f**2)*4*np.pi**2
@@ -554,10 +582,13 @@ def get_CW_sky_res_orbit(f0,h0,rho, model):
     See FomulationCalcs notebook for derivation.  Note that the SNR rho may be
     provided as a value or an nd.array.
     '''
-    R=model['Rorbit']*constants.AU
-    Om=2*np.pi/(model['Torbit']*constants.year)
-    rhoom=2*pi*f0*rho
-    sig2=2/(R*rhoom)**2
+    if 'Rorbit' in model and 'Torbit' in model:
+        R=model['Rorbit']*constants.AU
+        Om=2*np.pi/(model['Torbit']*constants.year)
+        rhoom=2*np.pi*f0*rho
+        sig2=2/(R*rhoom)**2
+    else:
+        sig2=float('inf')
     return sig2
 
 def get_sky_sigma2_Lconst(rho2om2,model):
@@ -569,8 +600,6 @@ def get_sky_sigma2_Lconst(rho2om2,model):
     for CW and chirping sources. Note that the rho2om2 may be provided as 
     a value or an nd.array.
     '''
-    R=model['Rorbit']*constants.AU
-    Om=2*np.pi/(model['Torbit']*constants.year)
     L=model['Lconst']/constants.c
     return 4/rho2om2/L**2     
 
@@ -585,12 +614,10 @@ def get_sky_sigma2_Dsep(rho2om2,model):
     each constellation.  This formula assumes that each constellation has
     the same sensitivity.
     '''
-    R=model['Rorbit']*constants.AU
-    Om=2*np.pi/(model['Torbit']*constants.year)
-    Dsep=model.get('Dsep',0)/constants.c
+    Dsep=model.get('Dsep',0)*constants.AU
     return 4/rho2om2/Dsep**2   
 
-def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp_style='TN',SNRdetect=10,SNRcut=1):  
+def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp_style='TN',SNRdetect=10,SNRcut=None):  
     '''
     Compute the SNR and angular sky resolution for an observation, applying 
     the method appropriate for the source type.
@@ -602,7 +629,7 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
       Nres         Number of samples to use in resolving chirp signals
       Tmax         Maximum observation duration (yr). For chirps, this 
                    specifies the approximate start time before merger. 
-      style        Style option for response calculation.
+      resp_style   Style option for response calculation.
       SNRdetect    Starting SNR from which to estimate detection
       SNRcut       Force sig->2pi as SNR->SNRcut, small SNR cases
     
@@ -621,7 +648,7 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
     if stype == 'CW':
         # continuous-wave source
         
-        h0, f0 = get_CW_h0_f0(source)
+        h0, f0 = sources.get_CW_h0_f0(source)
 
         if Tmax is None: Tmax=100
         Tdur=min([Tmax,model.get('SciDuration',Tmax)])
@@ -632,9 +659,9 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
         else:
             t=Tdur
         f=f0
-        snr = getCWsnr(f0,h0,t,model,style)
-        rho2om2= snr**2*(2*no.pi*f0)
-        sig2orb=get_CW_sky_res_orbit(f0,h0,shr, model)
+        snr = getCWsnr(f0,h0,t,model,resp_style)
+        rho2om2= snr**2*(2*np.pi*f0)
+        sig2orb=get_CW_sky_res_orbit(f0,h0,snr, model)
 
         observation['f']=f0
         observation['h']=h0
@@ -661,10 +688,11 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
             print('Recomputing chirp because net resolution is low.',len(tvals),'<',Nres/2)
             #Under-resolved so we will redo the chirp
             #first find the cutoff freq
-            fstop=fvals[-ncut]*1.02 #add 2% as buffer
+            fstop=fvals[-1]*1.2 #add a buffer
+            #print('fstop',fstop)
             #compute the net stop time
             #redo the chirp only up to cutoff freq
-            tvals,fvals,snri,Sh=computeChirp(source,model,tstart=1,Npts=Nres,fstop=fstop,tstop=tstop_source,resp_style=resp_style)
+            tvals,fvals,snri,Sh=computeChirp(source,model,tstart=tstart,Npts=Nres,fstop=fstop,tstop=tstop_source,resp_style=resp_style)
             #print('recomputed chirp:',tvals,fvals,snri,Sh)
         
         chirp=tvals,fvals,snri,Sh
@@ -686,7 +714,8 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
             sig2orb[-1]=res['sig2']
             
             #Create a log-uniform output time grid
-            tcuts = -np.flip(np.logspace(np.log10(max([100,-tvals[-1]])),np.log10(-tvals[2]),Nsamp-1))
+            tcuts = -np.flip(np.logspace(np.log10(max([100,-tvals[-1]])),np.log10(-tvals[0]),Nsamp))
+            tcuts=tcuts[1:]
             #Fill in grid
             for i in range(Nsamp-1):
                 #first trim the chirp

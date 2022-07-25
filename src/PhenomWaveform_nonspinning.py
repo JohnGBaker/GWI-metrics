@@ -47,6 +47,18 @@ def getFring(M,eta):
 def getFcut(M,eta):
     return (a4*eta**2 +b4*eta + c4)/np.pi/M
 
+#Added by John
+def getFisco(M,eta):
+    '''
+    Estimate of ISCO frequency 
+    '''
+    af = 3.464102*eta - 3.82116*eta**2 + 3.79245*eta**3 #https://arxiv.org/pdf/1605.01938.pdf
+    Z1 = 1 + ( 1 - af**2 )**(1/3) * ( (1+af)**(1/3) + (1-af)**(1/3) )
+    Z2 = (3*af**2 + Z1**2)**.5
+    rISCO = 3 + Z2 - ( (3-Z1)*(3+Z1+2*Z2) )**.5
+    OmegaISCO = 1/(rISCO**1.5+af) #Orbital
+    return OmegaISCO/M/np.pi
+
 # get the amplitude as a function of frequency, total mass, reduced mass ratio, and distance
 def binaryAmp(f,M,eta,d=1.0):
 
@@ -165,6 +177,8 @@ def fFromT(t,M,eta=0.25,t_merge=0):
     
     # Definition of Theta(t) from Eq. (315) of Blanchet's Living Review [https://arxiv.org/abs/1310.1528]
     Thetavals = ThetaFromT(t,M,eta,t_merge)
+    #print('args:',t,M,eta,t_merge)
+    #print('Thetavals',Thetavals)
 
     # taking this to the negative-one-eighth power to give the actual PN expansion parameter
     ThetaNEG8vals = Thetavals**(-0.125)
@@ -183,13 +197,17 @@ def fFromT(t,M,eta=0.25,t_merge=0):
     fac5 = (-11891.0/53760.0 + 109.0/1920.0*eta)*np.pi
 
     xvals = 0.25*ThetaNEG8vals**2*( fac0 + fac2*ThetaNEG8vals**2+ fac3*ThetaNEG8vals**3 + fac4*ThetaNEG8vals**4 + fac5*ThetaNEG8vals**5)
-
+    #print('xvals',xvals)
+    
     # compute orbital angular frequency
     omegavals = (xvals**1.5)/M
     
     # return GW frequency
     fvals = 2.0*omegavals/(2.0*np.pi)
-    
+
+    #for scalar or array, if x<=0 set fval to nan
+    fvals = np.choose(xvals>0,[float('nan'),np.real(fvals)]) 
+    #print('fvals',fvals)
     return fvals
 
 # get t(f from phase) t=(1/2pi)*dphase/df
