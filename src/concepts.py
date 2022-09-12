@@ -222,7 +222,6 @@ ALIAlowL = {
 GoBIGALIA = {
     'label' : 'GoBig(ALIA)',
     'description' : 'Two ALIA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version uses a LISA-sized constellation',
-    'label' : 'GOBIGALIA',
     'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
     'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
     'Lconst' : 0.5e9,
@@ -244,5 +243,5 @@ DECIGO = {
     'SciDuration' : 4
 }
 
-menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,DECIGO'.split(',')
+menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,GoBIGALIA,DECIGO'.split(',')
 menu={name:globals()[name] for name in menuNames}    
