@@ -38,7 +38,7 @@ Local Type Ia rate: (0.301±0.062)×10−4SNyr−1 Mpc−3
 ,,,1b-1c: BNS,"1.1.c, 1.1.d, 1.1.e",,,Sensitivity demands might make this out of reach; frequency ranges more friendly for 3rd-gen. ground-based,,,
 ,,,1b-1d: NS-BH,,,,Sensitivity demands might make this out of reach; frequency ranges more friendly for 3rd-gen. ground-based,,Cecilia,
 ,,,1b-1e: WD binary,"4.1.c, 4.1.d","Peak of Type 1a rate is at z = 2.0, not sure you many WDs at much higher redshifts, but there's a lot of uncertainty beyond z~1.5; Need to check the probability of lensing out to z ~ 2.0",,"Long-lived sources, but need some way to measure d_L; at higher redshifts, the required sensitivity might make this challenging",,,
-,,,1b-2f: EMRI,,,,,,,
+,,,1b-1f: EMRI,,,,,,,
 ,,,1b-1g: IMRI,,,,,,,
 ,,1b-2: Look for weak lensing of GWs,"1b-2a: Perform statistical analysis of MBHB mergers in order to identify sources that appear to be closer than indicated by redshift measurements, indicating systems are weakly lensed. ",,"(need an association with a redshift and compare GW luminosity distance from the waveform and compare with redshift and if d_L appears closer, then the signal is weakly lensed)",Need the capability to disentangle signals. Also need astronomical catalogs.,,Toni,,
 ,,,1b-2b: MBH binary systems localized to host galaxy,,,,,,,
