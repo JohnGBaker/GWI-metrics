@@ -423,7 +423,7 @@ def dResRange(fr,model):
 
 # This is new variation on what was in getChirpSNR above. The part focuses on
 # providing what is needed for the new localization calculations (also for SNR).
-def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_style='TN',fstart=None):
+def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_style='TN',fstart=None,getSignal=False):
     '''
     source -A dict containing:
       eta    Unitless reduced mass
@@ -496,14 +496,25 @@ def computeChirp(source,model,tstart=-1,Npts = 1000,fstop=None,tstop=None, resp_
         tvals=tvals[:-ncut]
         fvals=fvals[:-ncut]
     
-    # get the corresponding amplitude 
-    hvals = Phenom.binaryAmpOnly(fvals,mtot,eta,dl)
+    # get the corresponding amplitude
+    if getSignal:
+        hvals = Phenom.binaryAmp(fvals,mtot,eta,dl)
+    else:
+        hvals = Phenom.binaryAmpOnly(fvals,mtot,eta,dl)
+
+    if 'burstMwidth' in source and source['burstMwidth'] is not None:
+        #If this is present then the signal is set to fall off exponentially before merger with a decay time of burstMwidth measured in M
+        #The decay coefficient function looks like (1+tanh((t-tmerge)/width))/2
+        print('processing burst of width',source['burstMwidth'])
+        hvals*=(1+np.tanh(tvals/mtot/source['burstMwidth']))/2
+    
     Sh = makeSensitivity(fvals, model, style=resp_style)
     #snri = 4*np.real(hvals*np.conjugate(hvals)/Sh)
     snri = 4*(hvals**2/Sh)
     #snrt = np.sqrt(np.cumsum(np.diff(fvals)*snri[1:]))
     tvals = tvals[1:]
     #snri=np.concatenate(([0],snri))
+    if getSignal: return [tvals,fvals,snri,Sh,hvals]
     return [tvals,fvals,snri,Sh]
 
 def find_ncut(times,tstop,sign=1):
