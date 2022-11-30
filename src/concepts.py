@@ -15,6 +15,19 @@ LISASciRDv1 = {
     'SciDuration' : 4
 }
 
+#AMIGO
+AMIGO = {
+    'label' : 'AMIGO',
+    'sqSacc_ASD' : [[3e-16,.4e-3*3e-16],[0,-1]],
+    'sqSoms_ASD' : [[15e-13,15e-13*4.e-6],[0,-2]],
+    'Lconst' : 2.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
+}
+
 #LISA CBE
 LISACBE = {
     'label' : 'LISA(CBE)',
@@ -243,5 +256,5 @@ DECIGO = {
     'SciDuration' : 4
 }
 
-menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,GoBIGALIA,DECIGO'.split(',')
+menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,GoBIGALIA,DECIGO,AMIGO'.split(',')
 menu={name:globals()[name] for name in menuNames}    
