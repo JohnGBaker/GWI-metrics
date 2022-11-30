@@ -311,7 +311,9 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
             
     
             #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
-            snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=source.get('timecut',None))
+            tstop=source.get('timecut',None)
+            if tstop is not None:tstop*=counstants.year
+            snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=tstop)
         
             i10 = np.argmin(np.abs(snrt-10))
             t10 = tvals[i10]
@@ -615,6 +617,7 @@ def get_sky_sigma2_Dsep(rho2om2,model):
     the same sensitivity.
     '''
     Dsep=model.get('Dsep',0)*constants.AU
+    if Dsep==0:Dsep=1e-20
     return 4/rho2om2/Dsep**2   
 
 def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp_style='TN',SNRdetect=10,SNRcut=None):  
@@ -675,20 +678,21 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
         Tdur=min((Tdur,model.get('SciDuration',Tdur)))
         tstart=-Tdur
         #print('Tdur',Tdur,'tstart',tstart)
-        
+        daysperyear=constants.year/(24*3600)
         tstop_source=source.get('timecut',None)
-        if tstop_source is not None: tstop_source*=-1
-        
+        if tstop_source is not None: tstop_source*=-1/daysperyear
+        #print('tstop:',tstop_source)
         #Make first pass on chirp, based on source
         tvals,fvals,snri,Sh=computeChirp(source,model,tstart=tstart,Npts=Nres,fstop=None,tstop=tstop_source,resp_style=resp_style)
 
-        #print('initial chirp:',tvals,fvals,snri,Sh)
         #Now refine for model observation period
         if len(tvals) < Nres/2:
             print('Recomputing chirp because net resolution is low.',len(tvals),'<',Nres/2)
+            #print('initial chirp:',tvals,fvals,snri,Sh)
             #Under-resolved so we will redo the chirp
             #first find the cutoff freq
-            fstop=fvals[-1]*1.2 #add a buffer
+            fstop=None
+            if len(fvals)>0: fstop=fvals[-1]*1.2 #add a buffer
             #print('fstop',fstop)
             #compute the net stop time
             #redo the chirp only up to cutoff freq
@@ -745,11 +749,18 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
             res=get_chirp_snr_sky_sigma2_orbit(chirp,model)
             #print('res')
             #display(res)
-            t=tvals[-1]
-            f=fvals[-1]
-            snr=np.sqrt(res['rho2'])
-            rho2om2=res['rho2om2']
-            sig2orb=res['sig2']
+            if len(tvals)==0:
+                t=float('nan')
+                f=float('nan')              
+                snr=float('nan')
+                rho2om2=float('nan')
+                sig2orb=float('nan')
+            else:
+                t=tvals[-1]
+                f=fvals[-1]
+                snr=np.sqrt(res['rho2'])
+                rho2om2=res['rho2om2']
+                sig2orb=res['sig2']
             
         #completion of chirp info
         observation['f']=f
