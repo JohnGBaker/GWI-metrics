@@ -1,8 +1,10 @@
-#This file provides descriptors for reference GW imager mission concepts.
+# This file provides descriptors for reference GW imager mission concepts.
+# Input parameters from the Gravitational Wave Imager/Mission Concepts Design/Mission Architecture Trades 2.xlsx spreadsheet
+# last updated Nov 2024
+
 import subsystems
 
-
-#Baseline LISA concept
+# Baseline LISA concept
 LISASciRDv1 = {
     'label' : 'LISA(SciRDv1)',
     'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
@@ -15,7 +17,49 @@ LISASciRDv1 = {
     'SciDuration' : 4
 }
 
-#AMIGO
+# LISA SciRD with low-level noise
+LISASciRDLowLev = {
+    'label' : 'LISA(SciRDLowLev)',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 2.0,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 0.3,
+    'Responsivity' : 0.7,
+    'OMS_other_ASD' : [[15e-12],[0]], 
+    'Lconst' : 2.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4,
+    'TMxOmega2' : -8e-7, 
+    'OBGRSOmega2' : -7e-7, 
+    'TMsize' : 0.046,
+    'TMmat' : 'AuPt',
+    'VacuumPressure' : 1e-6, 
+    'ACCEL_other_ASD' : [[0],[0]],
+}
+
+# LISA CBE
+LISACBE = {
+    'label' : 'LISA(CBE)',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 2.0,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 0.3,
+    'Responsivity' : 0.7,
+    'OMS_other_ASD' : 10e-12,
+    'Lconst' : 2.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
+}
+
+# AMIGO
 AMIGO = {
     'label' : 'AMIGO',
     'sqSacc_ASD' : [[3e-16,.4e-3*3e-16],[0,-1]],
@@ -28,30 +72,12 @@ AMIGO = {
     'SciDuration' : 4
 }
 
-#LISA CBE
-LISACBE = {
-    'label' : 'LISA(CBE)',
-    'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
-    'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 1.5,
-    'lambdaOMS' : 1064,
-    'D_Tx' : 0.3,
-    'Responsivity' : 0.7,
-    'OMS_other_ASD' : 10e-12,
-    'Lconst' : 2.5e9,
-    'Dsep' : 0,
-    'Rorbit' : 1.0,
-    'Torbit' : 1.0,
-    'Nindep' : 2,
-    'SciDuration' : 4
-}
-
-#Twin LISA
+# Twin LISA
 TwinLISA = {
     'label' : 'Twin LISA',
-    'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 1.5,
+    'P_Tx' : 2.0,
     'lambdaOMS' : 1064,
     'D_Tx' : 0.3,
     'Responsivity' : 0.7,
@@ -64,33 +90,11 @@ TwinLISA = {
     'SciDuration' : 4
 }
 
-#LISA SciRD with low-level noise
-LISASciRDLowLev = {
-    'label' : 'LISA(SciRDLowLev)',
-    'sqSacc_func' : subsystems.ACC_Noise_PSD,
-    'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 1.5,
-    'lambdaOMS' : 1064,
-    'D_Tx' : 0.3,
-    'Responsivity' : 0.7,
-    'OMS_other_ASD' : [[15e-12],[0]],
-    'Lconst' : 2.5e9,
-    'Dsep' : 0,
-    'Rorbit' : 1.0,
-    'Torbit' : 1.0,
-    'Nindep' : 2,
-    'TMxOmega2' : -8e-7,
-    'OBGRSOmega2' : -7e-7,
-    'TMsize' : 0.046,
-    'TMmat' : 'AuPt',
-    'VacuumPressure' : 1e-6,
-    'ACCEL_other_ASD' : [[0],[0]],
-    'SciDuration' : 4
-}
 
+# LISA Grande
 LISAGrande = {
     'label' : 'LISA Grande',
-    'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
     'P_Tx' : 3,
     'lambdaOMS' : 1064,
@@ -107,15 +111,15 @@ LISAGrande = {
 
 # LISA-like mission in Folkner-like orbit
 LISAU = {
-    'label' : 'LIS-AU',
-    'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
+    'label' : 'LISA-AU',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
     'P_Tx' : 3,
     'lambdaOMS' : 1550,
     'D_Tx' : 1.0,
     'Responsivity' : 0.7,
     'OMS_other_ASD' : 10e-12,
-    'Lconst' : 2.6e11,
+    'Lconst' : 2.55e11,
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
@@ -123,27 +127,26 @@ LISAU = {
     'SciDuration' : 4
 }
 
-#Baseline LISA concept GoBIGLowF
+# Baseline LISA concept GoBIGLowF
 GoBIGLISA = {
     'label' : 'GoBig(LISA)',
     'description' : 'Two LISA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version uses a LISA-sized constellation',
     'label' : 'GOBIG',
-    'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 1.5,
+    'P_Tx' : 2.0,
     'lambdaOMS' : 1550,
     'D_Tx' : 0.3,
     'Responsivity' : 0.7,
     'OMS_other_ASD' : 10e-12,
-    'Lconst' : 5e9,
+    # 'Lconst' : 5e10, # according to the spreadsheet
+    'Lconst' : 2.5e9, # according to the LISA-like constellation
     'Dsep' : 30,
     'Nindep' : 4,
     'SciDuration' : 4
 }
     
-
-
-#Baseline LISA concept GoBIGLowF
+# Baseline LISA concept GoBIGLowF
 GoBIGLowF = {
     'label' : 'GoBig(LowF)',
     'description' : 'Two LISA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version optimized for the low-ff side of LISA\'s band.',
@@ -162,7 +165,7 @@ GoBIGLowF = {
     'SciDuration' : 4
 }
 
-#Baseline LISA concept GoBIGLowF2
+# Baseline LISA concept GoBIGLowF2
 GoBIGLowF2 = {
     'label' : 'GoBig(LowF2)',
     'description' : 'Two LISA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version optimized for the low-ff side of LISA\'s band.',
@@ -183,12 +186,16 @@ GoBIGLowF2 = {
     'SciDuration' : 4
 }
 
-#Baseline ALIA concept
+# Baseline ALIA concept
 ALIA = {
     'label' : 'ALIA',
     'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
     'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
     'Lconst' : 0.5e9,
+    'lambdaOMS' : 1064, 
+    'Responsivity' : 0.7,
+    'P_Tx' : 10,
+    'D_Tx' : 1.0,
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
@@ -196,12 +203,19 @@ ALIA = {
     'SciDuration' : 4
 }
 
-#Twin ALIA concept
+# Twin ALIA concept
 ALIAtwin = {
-    'label' : 'ALIAtwin',
-    'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
-    'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
+    'label' : 'Twin ALIA',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    # 'OMS_other_ASD' : .5e-12, #10e-12,
     'Lconst' : 0.5e9,
+    'lambdaOMS' : 1064,
+    'Responsivity' : 0.7,
     'Dsep' : 1,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
@@ -209,52 +223,125 @@ ALIAtwin = {
     'SciDuration' : 4
 }
 
-#ALIA low-level concept
+# ALIA low-level concept
 ALIAlowL = {
     'label' : 'ALIA low level',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10,
+    'lambdaOMS' : 1064,
+    # 'TMxOmega2' : .4*-8e-7, # -8e-7,
+    # 'OBGRSOmega2' : .4*-7e-7, # -7e-7,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    # 'OMS_other_ASD' : 10e-13, #10e-12,
+    'VacuumPressure' : 1e-6,
+    # 'TMsize' : .046*2.5 # .046
     'Lconst' : 0.5e9,
     'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
     'Nindep' : 2,
     'SciDuration' : 4,
-    'sqSacc_func' : subsystems.ACC_Noise_PSD,
-    'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 10,
-    'lambdaOMS' : 1064,
-    'TMxOmega2' : .4*-8e-7, # -8e-7,
-    'OBGRSOmega2' : .4*-7e-7, # -7e-7,
-    'D_Tx' : 1.0,
-    'Responsivity' : 0.7,
-    'OMS_other_ASD' : .5e-12, #10e-12,
-    'VacuumPressure' : 1e-6,
-    'TMsize' : .046*2.5 # .046
 }
 
-#Baseline LISA concept GoBIGLowF
+# Baseline LISA concept GoBIGLowF
 GoBIGALIA = {
     'label' : 'GoBig(ALIA)',
     'description' : 'Two ALIA-like constellations on near-radial trajectories (in near opposing directions) to larger distance in solar system. This version uses a LISA-sized constellation',
     'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
     'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
     'Lconst' : 0.5e9,
+    'P_Tx' : 10,
+    'D_Tx' : 1.0,
     'Dsep' : 30,
     'Nindep' : 4,
     'SciDuration' : 4
 }
 
-#Baseline DECIGO
+# Baseline DECIGO
 DECIGO = {
     'label' : 'DECIGO',
-    'sqSacc_ASD' : [[2e-18,.4e-3*2e-18],[0,-1]],
-    'sqSoms_ASD' : [[15e-18,15e-18*4.e-6],[0,-2]],
-    'Lconst' : 10e6,
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10,
+    'lambdaOMS' : 515,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    # 'OMS_other_ASD' : .5e-12, #10e-12,
+    'Lconst' : 1e6,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
     'Dsep' : 1.73,
-    'Nindep' : 6, #not sure how to specify the 4th constellation which is co-located with one of the other three, so skipping it.
+    'Nindep' : 6, # not sure how to specify the 4th constellation which is co-located with one of the other three, so skipping it.
     'SciDuration' : 4
 }
 
+
+## additional concepts from GW2050 for comparison
+# LISAMax
+LISAMax = {
+    'label' : 'LISAMax',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 1.0,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 1.0,
+    # 'Responsivity' : 0.7, # "optical_efficiency": 0.3,
+    'QE' : 0.3,
+    'Lconst' : 259e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4,
+    'TMsize' : 0.046 * 2 ** (1 / 3), # Assuming a test mass twice as massive as LISA
+    'TMmass': 1.928 * 2,
+    'VacuumPressure' : 2e-6 / 10, # Assuming a pressure 10 times lower than the LISA allocation
+    'ACCEL_other_ASD' : [[0],[0]],
+}
+
+# mu-Ares
+muAres = {
+    'label' : 'muAres',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10.0,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 1.0,
+    # 'Responsivity' : 0.7, # "optical_efficiency": 0.3,
+    'QE' : 0.5,
+    'VacuumPressure' : 2e-6 / 10, # Assuming a pressure 10 times lower than the LISA allocation
+    'Lconst' : 430e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4,
+}
+
+# DO-conservative
+DOcons = {
+    'label' : 'DOcons',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10.0,
+    'lambdaOMS' : 532,
+    'D_Tx' : 1.0,
+    # 'Responsivity' : 0.7, # "optical_efficiency": 0.3,
+    'QE' : 0.5,
+    'TMsize' : 0.046 * 2 ** (1 / 3), # Assuming a test mass twice as massive as LISA
+    'TMmass': 1.928 * 2,
+    'VacuumPressure' : 2e-6 / 10, # Assuming a pressure 10 times lower than the LISA allocation
+    'Lconst' : 1e8,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4,
+}
+
+
 menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,GoBIGALIA,DECIGO,AMIGO'.split(',')
+
 menu={name:globals()[name] for name in menuNames}    
