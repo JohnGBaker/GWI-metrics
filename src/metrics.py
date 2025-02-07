@@ -24,9 +24,9 @@ def PSD_noise_components(fr, model):
         sqSacc_ASD = model.get('sqSacc_ASD') 
         Sa_a = subsystems.F_Noise_PSD(fr,sqSacc_ASD,True)**2
     else:
-        Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instesad of a value
+        Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instead of a value
     Sa_d = Sa_a*(2.*np.pi*fr)**(-4.)
-    Sa_nu = Sa_d*(2.0*np.pi*fr/c)**2
+    Sa_nu = Sa_d*(2.0*np.pi*fr/c)**2 # Sa_a*(2.*np.pi*fr*c)**(-2.) eq(13)**2 LISA-LCST-SGS-TN-001
 
     ### Optical Metrology System
     if 'sqSoms_ASD' in model:
@@ -34,7 +34,7 @@ def PSD_noise_components(fr, model):
         Soms_d = subsystems.F_Noise_PSD(fr,sqSoms_ASD,True)**2
     else:
         Soms_d = model.get('sqSoms_func')(fr, model) #Can provide a func based Jeff's calculations
-    Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2
+    Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2 # eq(10)**2 LISA-LCST-SGS-TN-001
     
     return [Sa_nu, Soms_nu]
 
@@ -95,6 +95,9 @@ def makeSensitivity(fr, model,style='TN'):
     c=constants.c
     phiL = 2*np.pi*fr*L/c
     if style=='TN':
+        AvFXp2 = AvFXp2_approx(fr,L/c)
+        S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2)#LISA TN
+    if style=='Cornish':
         AvFXp2 = AvFXp2_approx(fr,L/c)
         S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2)#LISA TN
     elif style=='Larson': #This is very slow!
