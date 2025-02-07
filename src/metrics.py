@@ -24,9 +24,9 @@ def PSD_noise_components(fr, model):
         sqSacc_ASD = model.get('sqSacc_ASD') 
         Sa_a = subsystems.F_Noise_PSD(fr,sqSacc_ASD,True)**2
     else:
-        Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instesad of a value
+        Sa_a = model.get('sqSacc_func')(fr,model) #Can provide a func here instead of a value
     Sa_d = Sa_a*(2.*np.pi*fr)**(-4.)
-    Sa_nu = Sa_d*(2.0*np.pi*fr/c)**2
+    Sa_nu = Sa_d*(2.0*np.pi*fr/c)**2 # Sa_a*(2.*np.pi*fr*c)**(-2.) eq(13)**2 LISA-LCST-SGS-TN-001
 
     ### Optical Metrology System
     if 'sqSoms_ASD' in model:
@@ -34,7 +34,7 @@ def PSD_noise_components(fr, model):
         Soms_d = subsystems.F_Noise_PSD(fr,sqSoms_ASD,True)**2
     else:
         Soms_d = model.get('sqSoms_func')(fr, model) #Can provide a func based Jeff's calculations
-    Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2
+    Soms_nu = Soms_d*(2.0*np.pi*fr/c)**2 # eq(10)**2 LISA-LCST-SGS-TN-001
     
     return [Sa_nu, Soms_nu]
 
@@ -72,6 +72,7 @@ def Tarm(f,L):
 #Compute sensitivty curve
 def makeSensitivity(fr, model,style='TN'):
     '''
+    Based on the LISA Sensitivity and SNR Technical Note `LISA-LCST-SGS-TN-001`, available on [arXiv](https://arxiv.org/abs/2108.01167).
     Using the semi-analytical average response, the semi-analytical sensitivity for TDI X 4 links is:
     $$
     S_{h,X} =  \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
@@ -96,7 +97,7 @@ def makeSensitivity(fr, model,style='TN'):
     phiL = 2*np.pi*fr*L/c
     if style=='TN':
         AvFXp2 = AvFXp2_approx(fr,L/c)
-        S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2)#LISA TN
+        S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2) # LISA TN
     elif style=='Larson': #This is very slow!
         yTarm = np.zeros(len(fr))
         for i in range(len(fr)):
@@ -312,7 +313,8 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
     
             #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
             tstop=source.get('timecut',None)
-            if tstop is not None:tstop*=counstants.year
+            if tstop is not None:
+                tstop*=constants.year
             snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=tstop)
         
             i10 = np.argmin(np.abs(snrt-10))
