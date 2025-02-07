@@ -1,10 +1,17 @@
 # This file provides descriptors for reference GW imager mission concepts.
-# Input parameters from the Gravitational Wave Imager/Mission Concepts Design/Mission Architecture Trades 2.xlsx spreadsheet
-# last updated Nov 2024
+# Input parameters initially based on the Gravitational Wave Imager/Mission Concepts Design/Mission Architecture Trades 2.xlsx spreadsheet 
+# Compared and updates with the parameters of concepts published and available in the literature as of February 2025
+# last updated Feb 2025
 
 import subsystems
 
+##################################################
+## LISA Concepts
+##################################################
+
 # Baseline LISA concept
+# SciRD document, reference LISA-LCST-SGS-TN-001, https://arxiv.org/abs/2108.01167
+# hardcoded ACC and OMS noises
 LISASciRDv1 = {
     'label' : 'LISA(SciRDv1)',
     'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
@@ -18,6 +25,7 @@ LISASciRDv1 = {
 }
 
 # LISA SciRD with low-level noise
+# Replicates SciRDv1 but ACC and OMS noise are evaluated through the appropriate functions and not hardcoded 
 LISASciRDLowLev = {
     'label' : 'LISA(SciRDLowLev)',
     'sqSacc_func' : subsystems.ACC_Noise_PSD,
@@ -38,13 +46,33 @@ LISASciRDLowLev = {
     'TMsize' : 0.046,
     'TMmat' : 'AuPt',
     'VacuumPressure' : 1e-6, 
-    'ACCEL_other_ASD' : [[0],[0]],
+    'ACCEL_other_ASD' : [[1e-18, 2e-15],[-1, 0]], # accounting for acceleration noise terms that we did not include in the model to match LISA SciRDv1
+}
+
+LISAold = {
+    'label' : 'LISA(old 5Mkm arms)',
+    #'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
+    'sqSoms_ASD' : [[15e-12,15e-12*4.e-6],[0,-2]],
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    #'sqSoms_func' : subsystems.OMS_Noise_PSD,
+     'P_Tx' : 2.0,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 0.3,
+    'Responsivity' : 0.7,
+    'OMS_other_ASD' : 10e-12,
+    'Lconst' : 5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
 }
 
 # LISA CBE
 LISACBE = {
     'label' : 'LISA(CBE)',
-    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSacc_ASD' : [[3e-15,.4e-3*3e-15],[0,-1]],
+    #'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
     'P_Tx' : 2.0,
     'lambdaOMS' : 1064,
@@ -59,18 +87,9 @@ LISACBE = {
     'SciDuration' : 4
 }
 
-# AMIGO
-AMIGO = {
-    'label' : 'AMIGO',
-    'sqSacc_ASD' : [[3e-16,.4e-3*3e-16],[0,-1]],
-    'sqSoms_ASD' : [[15e-13,15e-13*4.e-6],[0,-2]],
-    'Lconst' : 2.5e9,
-    'Dsep' : 0,
-    'Rorbit' : 1.0,
-    'Torbit' : 1.0,
-    'Nindep' : 2,
-    'SciDuration' : 4
-}
+##################################################
+## Concepts under discussion in our study
+##################################################
 
 # Twin LISA
 TwinLISA = {
@@ -90,13 +109,12 @@ TwinLISA = {
     'SciDuration' : 4
 }
 
-
 # LISA Grande
 LISAGrande = {
     'label' : 'LISA Grande',
     'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 3,
+    'P_Tx' : 4, # doubling LISA SciRD P_Tx (was 3 when we assumed LISA P_Tx = 1.5)
     'lambdaOMS' : 1064,
     'D_Tx' : 0.5,
     'Responsivity' : 0.7,
@@ -114,7 +132,7 @@ LISAU = {
     'label' : 'LISA-AU',
     'sqSacc_func' : subsystems.ACC_Noise_PSD,
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    'P_Tx' : 3,
+    'P_Tx' : 4, # doubling LISA SciRD P_Tx (was 3 when we assumed LISA P_Tx = 1.5)
     'lambdaOMS' : 1550,
     'D_Tx' : 1.0,
     'Responsivity' : 0.7,
@@ -145,7 +163,7 @@ GoBIGLISA = {
     'Nindep' : 4,
     'SciDuration' : 4
 }
-    
+
 # Baseline LISA concept GoBIGLowF
 GoBIGLowF = {
     'label' : 'GoBig(LowF)',
@@ -188,7 +206,7 @@ GoBIGLowF2 = {
 
 # Baseline ALIA concept
 ALIA = {
-    'label' : 'ALIA',
+    'label' : 'ALIA GWI spreadsheet',
     'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
     'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
     'Lconst' : 0.5e9,
@@ -203,6 +221,44 @@ ALIA = {
     'SciDuration' : 4
 }
 
+# Baseline ALIA concept
+ALIAbender = {
+    'label' : 'ALIA Bender',
+    'sqSacc_ASD' : [[3e-16,.4e-3*3e-16],[0,-1]],
+    # 'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'Lconst' : 0.5e9,
+    'lambdaOMS' : 1064, 
+    'Responsivity' : 0.7,
+    # 'OMS_other_ASD': 1e-13,
+    'P_Tx' : 30,
+    'D_Tx' : 1.0,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
+}
+
+# Baseline ALIA concept
+ALIAcornish = {
+    'label' : 'ALIA Cornish',
+    'sqSacc_ASD' : [[3e-16,.4e-3*3e-16],[0,-1]],
+    'sqSoms_ASD' : [[1e-13,1e-13*4.e-6],[0,-2]],
+    # 'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'Lconst' : 0.5e9,
+    'lambdaOMS' : 1064, 
+    'Responsivity' : 0.7,
+    'P_Tx' : 30,
+    'D_Tx' : 1.0,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
+}
+
+
 # Twin ALIA concept
 ALIAtwin = {
     'label' : 'Twin ALIA',
@@ -214,8 +270,6 @@ ALIAtwin = {
     'Responsivity' : 0.7,
     # 'OMS_other_ASD' : .5e-12, #10e-12,
     'Lconst' : 0.5e9,
-    'lambdaOMS' : 1064,
-    'Responsivity' : 0.7,
     'Dsep' : 1,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
@@ -226,15 +280,17 @@ ALIAtwin = {
 # ALIA low-level concept
 ALIAlowL = {
     'label' : 'ALIA low level',
-    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+     # 'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
     'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    #'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
     'P_Tx' : 10,
     'lambdaOMS' : 1064,
     # 'TMxOmega2' : .4*-8e-7, # -8e-7,
     # 'OBGRSOmega2' : .4*-7e-7, # -7e-7,
     'D_Tx' : 1.0,
     'Responsivity' : 0.7,
-    # 'OMS_other_ASD' : 10e-13, #10e-12,
+    'OMS_other_ASD' : 0.3e-13, #10e-12,
     'VacuumPressure' : 1e-6,
     # 'TMsize' : .046*2.5 # .046
     'Lconst' : 0.5e9,
@@ -259,6 +315,21 @@ GoBIGALIA = {
     'SciDuration' : 4
 }
 
+## other concepts not under discussion in our study, but useful as reference and comparison
+
+# AMIGO
+AMIGO = {
+    'label' : 'AMIGO',
+    'sqSacc_ASD' : [[3e-16,.4e-3*3e-16],[0,-1]],
+    'sqSoms_ASD' : [[15e-13,15e-13*4.e-6],[0,-2]],
+    'Lconst' : 2.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4
+}
+
 # Baseline DECIGO
 DECIGO = {
     'label' : 'DECIGO',
@@ -277,8 +348,6 @@ DECIGO = {
     'SciDuration' : 4
 }
 
-
-## additional concepts from GW2050 for comparison
 # LISAMax
 LISAMax = {
     'label' : 'LISAMax',
@@ -341,7 +410,6 @@ DOcons = {
     'SciDuration' : 4,
 }
 
-
-menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAtwin,ALIAlowL,GoBIGALIA,DECIGO,AMIGO'.split(',')
+menuNames='LISASciRDv1,LISACBE,TwinLISA,LISASciRDLowLev,LISAGrande,LISAU,GoBIGLISA,GoBIGLowF,GoBIGLowF2,ALIA,ALIAbender,ALIAcornish,ALIAtwin,ALIAlowL,GoBIGALIA,DECIGO,AMIGO'.split(',')
 
 menu={name:globals()[name] for name in menuNames}    
