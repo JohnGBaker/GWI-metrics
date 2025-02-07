@@ -72,6 +72,7 @@ def Tarm(f,L):
 #Compute sensitivty curve
 def makeSensitivity(fr, model,style='TN'):
     '''
+    Based on the LISA Sensitivity and SNR Technical Note `LISA-LCST-SGS-TN-001`, available on [arXiv](https://arxiv.org/abs/2108.01167).
     Using the semi-analytical average response, the semi-analytical sensitivity for TDI X 4 links is:
     $$
     S_{h,X} =  \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
@@ -96,10 +97,7 @@ def makeSensitivity(fr, model,style='TN'):
     phiL = 2*np.pi*fr*L/c
     if style=='TN':
         AvFXp2 = AvFXp2_approx(fr,L/c)
-        S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2)#LISA TN
-    if style=='Cornish':
-        AvFXp2 = AvFXp2_approx(fr,L/c)
-        S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2)#LISA TN
+        S_hX = (Soms_nu + Sa_nu*(3.+np.cos(2*phiL)) ) / (phiL**2 * AvFXp2/4**2) # LISA TN
     elif style=='Larson': #This is very slow!
         yTarm = np.zeros(len(fr))
         for i in range(len(fr)):
