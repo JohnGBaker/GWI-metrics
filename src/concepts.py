@@ -101,11 +101,12 @@ TwinLISA = {
     'D_Tx' : 0.3,
     'Responsivity' : 0.7,
     'OMS_other_ASD' : 10e-12,
+    'ACCEL_other_ASD' : [[1e-18, 2e-15],[-1, 0]], # accounting for acceleration noise terms that we did not include in the model to match LISA SciRDv1
     'Lconst' : 2.5e9,
-    'Dsep' : 1,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 4,
+    'Nindep' : 4, # adding an additional constellation doubles number of independent links
+    'Dsep' : 1, # adding an additional constellation at 1 AU
     'SciDuration' : 4
 }
 
@@ -119,11 +120,12 @@ LISAGrande = {
     'D_Tx' : 0.5,
     'Responsivity' : 0.7,
     'OMS_other_ASD' : 10e-12,
-    'Lconst' : 25e9,
-    'Dsep' : 0,
+    'ACCEL_other_ASD' : [[1e-18, 2e-15],[-1, 0]], # accounting for acceleration noise terms that we did not include in the model to match LISA SciRDv1
+    'Lconst' : 25e9, # 10 times bigger than LISA
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
     'Nindep' : 2,
+    'Dsep' : 0,
     'SciDuration' : 4
 }
 
@@ -137,11 +139,12 @@ LISAU = {
     'D_Tx' : 1.0,
     'Responsivity' : 0.7,
     'OMS_other_ASD' : 10e-12,
+    'ACCEL_other_ASD' : [[1e-18, 2e-15],[-1, 0]], # accounting for acceleration noise terms that we did not include in the model to match LISA SciRDv1
     'Lconst' : 2.55e11,
-    'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
     'Nindep' : 2,
+    'Dsep' : 0,
     'SciDuration' : 4
 }
 
@@ -157,6 +160,7 @@ GoBIGLISA = {
     'D_Tx' : 0.3,
     'Responsivity' : 0.7,
     'OMS_other_ASD' : 10e-12,
+    'ACCEL_other_ASD' : [[1e-18, 2e-15],[-1, 0]], # accounting for acceleration noise terms that we did not include in the model to match LISA SciRDv1
     # 'Lconst' : 5e10, # according to the spreadsheet
     'Lconst' : 2.5e9, # according to the LISA-like constellation
     'Dsep' : 30,
@@ -206,7 +210,7 @@ GoBIGLowF2 = {
 
 # Baseline ALIA concept
 ALIA = {
-    'label' : 'ALIA GWI spreadsheet',
+    'label' : 'ALIA',
     'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
     'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
     'Lconst' : 0.5e9,
@@ -219,6 +223,27 @@ ALIA = {
     'Torbit' : 1.0,
     'Nindep' : 2,
     'SciDuration' : 4
+}
+
+# ALIA low-level concept
+ALIAlowL = {
+    'label' : 'ALIA low level',
+    'sqSacc_func' : subsystems.ACC_Noise_PSD,
+    'sqSoms_func' : subsystems.OMS_Noise_PSD,
+    'P_Tx' : 10,
+    'lambdaOMS' : 1064,
+    'D_Tx' : 1.0,
+    'Responsivity' : 0.7,
+    'OMS_other_ASD' : 0.05*10e-12, # LISA: 10e-12,
+    'TMxOmega2' : .5*-8e-7, # LISA: -8e-7,
+    'OBGRSOmega2' : .5*-7e-7, # LISA: -7e-7,
+    'TMsize' : 2*.046, # LISA: .046
+    'Lconst' : 0.5e9,
+    'Dsep' : 0,
+    'Rorbit' : 1.0,
+    'Torbit' : 1.0,
+    'Nindep' : 2,
+    'SciDuration' : 4,
 }
 
 # Baseline ALIA concept
@@ -275,30 +300,6 @@ ALIAtwin = {
     'Torbit' : 1.0,
     'Nindep' : 4,
     'SciDuration' : 4
-}
-
-# ALIA low-level concept
-ALIAlowL = {
-    'label' : 'ALIA low level',
-     # 'sqSacc_func' : subsystems.ACC_Noise_PSD,
-    'sqSacc_ASD' : [[6e-16,.4e-3*6e-16],[0,-1]],
-    'sqSoms_func' : subsystems.OMS_Noise_PSD,
-    #'sqSoms_ASD' : [[5e-13,5e-13*4.e-6],[0,-2]],
-    'P_Tx' : 10,
-    'lambdaOMS' : 1064,
-    # 'TMxOmega2' : .4*-8e-7, # -8e-7,
-    # 'OBGRSOmega2' : .4*-7e-7, # -7e-7,
-    'D_Tx' : 1.0,
-    'Responsivity' : 0.7,
-    'OMS_other_ASD' : 0.3e-13, #10e-12,
-    'VacuumPressure' : 1e-6,
-    # 'TMsize' : .046*2.5 # .046
-    'Lconst' : 0.5e9,
-    'Dsep' : 0,
-    'Rorbit' : 1.0,
-    'Torbit' : 1.0,
-    'Nindep' : 2,
-    'SciDuration' : 4,
 }
 
 # Baseline LISA concept GoBIGLowF
