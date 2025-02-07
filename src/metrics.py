@@ -313,7 +313,8 @@ def getSourceSnr(source,model,T = 4*constants.year, Npts = 1000,style='TN'):
     
             #print('mtot = %3.2g, eta = %3.2g, ds = %3.2g, T = %3.2g' % (mtot,eta,ds,T))
             tstop=source.get('timecut',None)
-            if tstop is not None:tstop*=counstants.year
+            if tstop is not None:
+                tstop*=constants.year
             snrt, tvals, fvals, hvals = getChirpSNR(mtot,eta,ds,model,T,Npts,style,tstop=tstop)
         
             i10 = np.argmin(np.abs(snrt-10))
