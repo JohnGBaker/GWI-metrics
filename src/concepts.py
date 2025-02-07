@@ -293,13 +293,16 @@ ALIAtwin = {
     'lambdaOMS' : 1064,
     'D_Tx' : 1.0,
     'Responsivity' : 0.7,
-    # 'OMS_other_ASD' : .5e-12, #10e-12,
+    'OMS_other_ASD' : 0.05*10e-12, # LISA: 10e-12,
+    'TMxOmega2' : .5*-8e-7, # LISA: -8e-7,
+    'OBGRSOmega2' : .5*-7e-7, # LISA: -7e-7,
+    'TMsize' : 2*.046, # LISA: .046
     'Lconst' : 0.5e9,
-    'Dsep' : 1,
+    'Dsep' : 0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 4,
-    'SciDuration' : 4
+    'Nindep' : 2,
+    'SciDuration' : 4,
 }
 
 # Baseline LISA concept GoBIGLowF
