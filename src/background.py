@@ -30,7 +30,7 @@ def compute_background_PSD(f,model):
 
 def GBF_model_TN(f,instrParams,nativeParams=None):
     '''
-    Model for the unresolved galactic binary foreground from the LISA Sensitivity Tech Note.
+    Model for the unresolved galactic binary foreground from the LISA Sensitivity Tech Note LISA-LCST-SGS-TN-001.
     This conforms to a general interface for background/foreground models
     The interface argumentss are:
                  f  -  a frequency (or array) 
