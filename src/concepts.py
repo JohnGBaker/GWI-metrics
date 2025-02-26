@@ -298,10 +298,10 @@ ALIAtwin = {
     'OBGRSOmega2' : .5*-7e-7, # LISA: -7e-7,
     'TMsize' : 2*.046, # LISA: .046
     'Lconst' : 0.5e9,
-    'Dsep' : 0,
+    'Dsep' : 1.0,
     'Rorbit' : 1.0,
     'Torbit' : 1.0,
-    'Nindep' : 2,
+    'Nindep' : 4,
     'SciDuration' : 4,
 }
 
