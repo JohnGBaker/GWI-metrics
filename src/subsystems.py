@@ -1,9 +1,9 @@
-################################################################################
-# These are functions for defining GW mission subsystems.
-# They are used in sensitivity calculations and possibly other places.
-# Written by: J Slutsky
-# Some edits by: E Castelli 06/2022
-################################################################################
+'''
+These are functions for defining GW mission subsystems.
+They are used in sensitivity calculations and possibly other places.
+Written by: J Slutsky
+Some edits by: E Castelli 06/2022
+'''
 import constants
 import numpy as np
 
@@ -13,15 +13,15 @@ import numpy as np
 # [Ref. to spreadsheet?]
 
 # OMS parameters
-'''
-P_Tx          | W           | Transmitted power
-lambdaOMS     | nm          | Laser wavelength
-D_Tx          | m           | Transmitter mirror diameter
-D_Rx          | m           | Receiver mirror diameter (optional, otherwise=D_Tx)
-Responsivity  | A/W         | Photodetector responsivity [need Resp or QE]
-QE            | -           | Ouantum Efficiency [need Resp or QE]
-OMS_other     | pm/sqrt(Hz) | Other sources of OMS noise to add in quadrature
-'''
+# '''
+# P_Tx          | W           | Transmitted power
+# lambdaOMS     | nm          | Laser wavelength
+# D_Tx          | m           | Transmitter mirror diameter
+# D_Rx          | m           | Receiver mirror diameter (optional, otherwise=D_Tx)
+# Responsivity  | A/W         | Photodetector responsivity [need Resp or QE]
+# QE            | -           | Ouantum Efficiency [need Resp or QE]
+# OMS_other     | pm/sqrt(Hz) | Other sources of OMS noise to add in quadrature
+# '''
 
 def OMS_Noise_PSD(fr, model, verbose=False):
     '''
@@ -39,15 +39,18 @@ def OMS_Noise_PSD(fr, model, verbose=False):
     P_Tx=model['P_Tx']
     lambdaOMS=model['lambdaOMS']*1e-9
     D_Tx=model['D_Tx']
-    if 'D_Rx' in model: D_Rx=model['D_Rx']
-    else: D_Rx=D_Tx
+    if 'D_Rx' in model:
+        D_Rx=model['D_Rx']
+    else:
+        D_Rx=D_Tx
     L_arm=model['Lconst']
 
-    if ( 'QE' in model and 'Responsivity' in model ) or not ( 'QE' in model or 'Responsivity' in model ):
+    if('QE' in model and 'Responsivity' in model)or not('QE' in model or 'Responsivity' in model):
         raise ValueError('Need QE or Responsivity, not both')
     if 'Responsivity' in model:
         Responsivity=model['Responsivity']
-        QE=Responsivity*constants.h_planck*constants.c/constants.e_charge/lambdaOMS
+        QE=Responsivity*constants.h_planck* \
+        constants.c/constants.e_charge/lambdaOMS
     if 'QE' in model:
         QE=model['QE']
 
@@ -58,19 +61,24 @@ def OMS_Noise_PSD(fr, model, verbose=False):
         print('QE:',QE)
         print('P_Rx:',OMS_received_power(model))
         print('sqSn_shot:',np.sqrt(Sn_shot))
-    
+
     OMS_other=0
-    if 'OMS_other_ASD' in model:OMS_other=model['OMS_other_ASD']
+    if 'OMS_other_ASD' in model:
+        OMS_other=model['OMS_other_ASD']
     OMS_other_ASD = F_Noise_PSD(fr,OMS_other)
 
     Sn = Sn_shot + OMS_other_ASD**2
     return Sn
 
 def OMS_received_power(model):
+    '''
+    Model for OMS received power
+    '''
     P_Tx=model['P_Tx']
     lambdaOMS=model['lambdaOMS']*1e-9
     D_Tx=model['D_Tx']
-    if 'D_Rx' in model: D_Rx=model['D_Rx']
+    if 'D_Rx' in model:
+        D_Rx=model['D_Rx']
     else: D_Rx=D_Tx
     L_arm=model['Lconst']
 
@@ -86,18 +94,18 @@ def OMS_received_power(model):
 
 # Acceleration parameters
 # do we also want to include actuation parameters or other stuff here?
-'''
-Return ACCEL subsystem noise power in m^2/s^4/Hz on freqs in fr
-Parameters in model dictionary should include:
-TMxOmega2          | s^-2           | Test Mass x-axis stiffness
-OBGRSOmega2        | s^-2           | OB/GRS TMx stiffness (?)
-TMsize             | m              | TM linear dimension
-TMmat              |                | TM material composition
-VacuumPressure     | Pa             | Residual gas vacuum presure
-ACCEL_other_ASD    | m/s^2          | Catch-all unknown acceleration noise input
-'''
 
 def ACC_Noise_PSD(fr, model):
+    '''
+    Return ACCEL subsystem noise power in m^2/s^4/Hz on freqs in fr
+    Parameters in model dictionary should include:
+    TMxOmega2          | s^-2           | Test Mass x-axis stiffness
+    OBGRSOmega2        | s^-2           | OB/GRS TMx stiffness (?)
+    TMsize             | m              | TM linear dimension
+    TMmat              |                | TM material composition
+    VacuumPressure     | Pa             | Residual gas vacuum presure
+    ACCEL_other_ASD    | m/s^2          | Catch-all unknown acceleration noise input
+    '''
 
     # make unit array of same dimensions as frequency array
     Xf = F_Noise_PSD(fr,[[1],[0]])
@@ -112,16 +120,16 @@ def ACC_Noise_PSD(fr, model):
     # Test Mass x-axis stiffness
     omegasquarexx = -8e-7 #  Ref. PRD 97:122002 + LISA-UTN-INST-TN-003
     if 'TMxOmega2' in model:
-        omegasquarexx = model.get('TMxOmega2');
+        omegasquarexx = model.get('TMxOmega2')
     # OB/GRS TMx stiffness (?)
     omegasquareGRSxx=-7e-7
     if 'OBGRSOmega2' in model:
-        omegasquareGRSxx = model.get('OBGRSOmega2');
+        omegasquareGRSxx = model.get('OBGRSOmega2')
     # TM cube linear dimension
     if 'TMsize' in model:
         TMsize = model.get('TMsize')
     else:
-        TMsize = .046;
+        TMsize = .046
     # TM material
     TMmassAu = 1.93*(TMsize/.046)**3
     if 'TMmat' in model:
@@ -138,13 +146,17 @@ def ACC_Noise_PSD(fr, model):
     else:
         TMmass = TMmassAu
         chi_B=3e-5
+    #TM mass
+    if 'TMmass' in model:
+        TMmass = model.get('TMmass')
     # Vacuum Pressure
     VacuumPressure = 1e-6
     if 'VacuumPressure' in model:
         VacuumPressure=model.get('VacuumPressure')
     # Margin/misc
     ACCEL_other=0
-    if 'ACCEL_other_ASD' in model:ACCEL_other=model['ACCEL_other_ASD']
+    if 'ACCEL_other_ASD' in model:
+        ACCEL_other=model['ACCEL_other_ASD']
 
     ### Parameters from the Perf. model and NOT read from input
     # + Noise spectra of known quantities used in the evaluation of the single noise terms
@@ -152,15 +164,20 @@ def ACC_Noise_PSD(fr, model):
 
     ## Actuation noise
     # electrodes effective armlength between x-face electrodes
-    R_star = 0.033 # ref. ESA-L3-EST-INST-DD-001 v2.2, LISA Payload Definition Document and upcoming LPF actuation paper
+    # ref. ESA-L3-EST-INST-DD-001 v2.2 LISA Payload Definition Document and LPF actuation paper
+    R_star = 0.033
     # partial derivative of C_x TM w.r.t. x
-    DCX_DX_GRS1 = 2.91139e-10 # ref. ESA-L3-EST-INST-DD-001 and J.Phys.Conf.Ser.154:012008
+    # ref. ESA-L3-EST-INST-DD-001 and J.Phys.Conf.Ser.154:012008
+    DCX_DX_GRS1 = 2.91139e-10
     # partial derivative of C_x EH w.r.t. x
-    DCXH_DX_GRS1 = -6.9675e-11 # ref. ESA-L3-EST-INST-DD-001 and J.Phys.Conf.Ser.154:012008
+    # ref. ESA-L3-EST-INST-DD-001 and J.Phys.Conf.Ser.154:012008
+    DCXH_DX_GRS1 = -6.9675e-11
     # maximum torque acting on phi
-    gamma_c = 1e-9 # Ref. LISA-UTN-INST-TN-006 v1 grav specs analysis and upcoming LPF actuation paper
+    # Ref. LISA-UTN-INST-TN-006 v1 grav specs analysis and upcoming LPF actuation paper
+    gamma_c = 1e-9
     # authority margin on phi
-    authority_margin = 1.5 # Ref. LISA-UTN-INST-TN-006 v1 grav specs analysis and upcoming LPF actuation paper
+    # Ref. LISA-UTN-INST-TN-006 v1 grav specs analysis and upcoming LPF actuation paper
+    authority_margin = 1.5
     # Uncorrelated gain fluctuations (1/f)
     # Ref. upcoming LPF actuation paper +  J.Phys.Conf.Ser. 840:012006 (2017) + CQG 33:235015 (2016)
     S_alpha_UC_f1 = 4E-6**2*(1e-3/fr)
@@ -168,7 +185,8 @@ def ACC_Noise_PSD(fr, model):
     # Ref. upcoming LPF actuation paper +  J.Phys.Conf.Ser. 840:012006 (2017) + CQG 33:235015 (2016)
     S_alpha_UC_f2 = 50E-6**2*(1e-4/fr)**2
     # additive actuation voltage noise
-    S_V = (2e-6)**2 # ref. ESA-L3-EST-INST-DD-001 and J.Phys.Conf.Ser.154:012008
+    # ref. ESA-L3-EST-INST-DD-001 and J.Phys.Conf.Ser.154:012008
+    S_V = (2e-6)**2
 
     ## Brownian noise
     # Brownian noise amplification factor due to the proximity of the EH surfaces to the TM
@@ -181,7 +199,7 @@ def ACC_Noise_PSD(fr, model):
     CTOT = 3.42e-11 # Ref. PRL 108:181101
     # Number of elementary Test Mass charges
     Nq = 15e6 # Ref. PRL 108:181101
-    # effective single electrode noise which is a sum of three terms depending on [0 -1 -2] powers of the frequency
+    # effective single electrode noise is a sum of three terms depending on [0 -1 -2] powers of the frequency
     # Sdeltax = A*VTM_meansq*f^0 + B*VTM_meansq*f^-1 + C*VTM_meansq*f^-2
     # VTM_meansq is the mean squared value of TM voltage evaluated from the RMS charge measured on the spacecraft
     # A, B, C come from a charged TM voltage noise test (need to recover the pest values by running a Matlab script)
@@ -202,7 +220,7 @@ def ACC_Noise_PSD(fr, model):
     # GRS-OB baseline deformation contribution to x jitter
     S_x_GRS = (0.3e-9)**2*(1+(1.5e-3/fr)**2) # LISA-UTN-INST-RP-010
     # TestMass Jitter along x with respect to MOSA
-    Sx_tm = (0.95e-9)**2*(1+(2e-4/fr)**2)/(1+(fr/8e-3/(10**0.5))**4);# LISA-UTN-INST-TN-006 v1 grav specs analysis
+    Sx_tm = (0.95e-9)**2*(1+(2e-4/fr)**2)/(1+(fr/8e-3/(10**0.5))**4)# LISA-UTN-INST-TN-006 v1 grav specs analysis
 
     #######################
     # CALCULATE NOISE TERMS
@@ -230,7 +248,7 @@ def ACC_Noise_PSD(fr, model):
     # giving rise to a noisy force acting on the TM. The surface effect is companioned by fluctuations in the electrode potential generated
     # by the Front End Electronics actuation, which will add to the stray voltages.
     # = sqrt(1./TMmass.^2 .* ((DCX_DX_GRS1 + DCXH_DX_GRS1)./CTOT .* Nq .* E).^2.* Sdeltax)
-    StrayV = (1/TMmass**2 * ((DCX_DX_GRS1 + DCXH_DX_GRS1)/CTOT * Nq * e_charge)**2 * Sdeltax)
+    StrayV = 1/TMmass**2 * ((DCX_DX_GRS1 + DCXH_DX_GRS1)/CTOT * Nq * e_charge)**2 * Sdeltax
     # StrayV = (2.42729210509713e-22*Sdeltax)**0.5/TMmass                      #M**-1 maybe need TMsize scaling?
 
     ## Magnetic noises
@@ -262,11 +280,13 @@ def ACC_Noise_PSD(fr, model):
     return ACC
 
 def F_Noise_PSD(fr, pLaws, QUAD=False):
-    # Generate an output array with length equal to that of input frequency axis 'fr'. Output array values are determined by one
-    # or more powerlaws.  If input pLaws is an int or float, then a constant amplitude output at that value is generated.  If
-    # input is a two-element list, then the first element contains one or more amplitudes, and the second element contains the
-    # same number of respective power laws. If the two lists are of different lengths, '0's are padded onto the end, for example
-    # [[1] [0 2]] is the same as [[1 0] [0 2]], in effect [[1] [0]] which is a an array of where every element has the value '1'.
+    '''
+    Generate an output array with length equal to that of input frequency axis 'fr'. Output array values are determined by one
+    or more powerlaws.  If input pLaws is an int or float, then a constant amplitude output at that value is generated.  If
+    input is a two-element list, then the first element contains one or more amplitudes, and the second element contains the
+    same number of respective power laws. If the two lists are of different lengths, '0's are padded onto the end, for example
+    [[1] [0 2]] is the same as [[1 0] [0 2]], in effect [[1] [0]] which is a an array of where every element has the value '1'.
+    '''
 
     if (type(pLaws) is int) or (type(pLaws) is float):
         freqPower = [0]
@@ -276,8 +296,10 @@ def F_Noise_PSD(fr, pLaws, QUAD=False):
         freqAmp = pLaws[:][0]
 
     fMatch = np.size(freqPower) - np.size(freqAmp)
-    if fMatch > 0: freqAmp += [0]*fMatch
-    if fMatch < 0: freqPower += [0]*(-fMatch)
+    if fMatch > 0:
+        freqAmp += [0]*fMatch
+    if fMatch < 0:
+        freqPower += [0]*(-fMatch)
 
     outPSD = np.zeros(np.size(fr))
     if QUAD:
