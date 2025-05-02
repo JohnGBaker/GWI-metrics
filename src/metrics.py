@@ -12,8 +12,8 @@ def PSD_noise_components(fr, model):
     '''
     Make PSD Noise Components
     We follow LISA in computing the noise. In that case the noise is more-or-less directly derived from 
-    - a measure of the acceleration noise in $m/s^2/\sqrt(Hz)$ with some additional reddening factors
-    - a measure of optical measurement system noise in $m/\sqrt(Hz)$
+    - a measure of the acceleration noise in m/s^2/sqrt(Hz) with some additional reddening factors
+    - a measure of optical measurement system noise in m/sqrt(Hz)
     The noise PSD is reported in fractional frequency units
     '''
         
@@ -69,23 +69,23 @@ def Tarm(f,L):
     return ((1+cu*cu)*(1./3.-2./(u*u))+su*su+4.*su*cu/(u*u*u))/(u*u) - Iet[0]/(4.*np.pi)
 
     
-#Compute sensitivty curve
+#Compute sensitivity curve
 def makeSensitivity(fr, model,style='TN'):
-    '''
-    Using the semi-analytical average response, the semi-analytical sensitivity for TDI X 4 links is:
-    $$
-    S_{h,X} =  \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
-    { \left( {\omega L \over c} \right)^2 \ R_{\Sigma}^2(f, L) }
-    $$
-    $$
-    S_{h,X} 
-    =  \frac{S_{n,X_{2.0}}}
-    {<R_{L, X_{2.0}}(f)>} 
-    = \frac{ 64 \sin^2 \left( \omega L \right) \sin^2 \left(2 \omega L \right) (S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc}) }
-    { (4\omega L)^2 \sin^2{(\omega L)} (2 \sin{(2\omega L)})^2 <(F^{+}_{X})^2> }
-    = \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
-    { \left( \omega L \right)^2  <(F^{+}_{X})^2>  }
-    '''
+    #'''
+    #Using the semi-analytical average response, the semi-analytical sensitivity for TDI X 4 links is:
+    #$$
+    #S_{h,X} =  \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
+    #{ \left( {\omega L \over c} \right)^2 \ R_{\Sigma}^2(f, L) }
+    #$$
+    #$$
+    #S_{h,X} 
+    #=  \frac{S_{n,X_{2.0}}}
+    #{<R_{L, X_{2.0}}(f)>} 
+    #= \frac{ 64 \sin^2 \left( \omega L \right) \sin^2 \left(2 \omega L \right) (S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc}) }
+    #{ (4\omega L)^2 \sin^2{(\omega L)} (2 \sin{(2\omega L)})^2 <(F^{+}_{X})^2> }
+    #= \frac{ S_{OMS} + \left( 3 + \cos \left( \frac{2 \omega L}{c} \right)  \right)  S_{acc} }
+    #{ \left( \omega L \right)^2  <(F^{+}_{X})^2>  }
+    #'''
     #print('makeSens:',fr[0],'< f <',fr[-1],'style=',style, 'model:')
     #display(model)
     
@@ -158,16 +158,16 @@ def getBaseline(model,t=0,tstart=0):
 
 #Make SNR for continuous-wave source
 def getCWsnr(f0,h0,T,model,style='TN'):
-    '''
-    Compute the SNR for a monochromatic GW source based on the source frequency f0, source ampltiude h0, obsertvation time T, and an instrument model. 
-    
-    The calculation follows (83) from the LISA-LCST-SGS-TN-001 (https://arxiv.org/abs/2108.01167) to compute the inclinaiton, polarization, and sky-position averaged SNR for a monochomatic source:
-    $$
-    \left<SNR^2\right>_{\iota,\psi,sky} = 10 \frac{\left(\frac{2}{5}h_0\right)^2T}{S_h\left(f_0\right)}
-    $$
-    
-    where the instrument sensitivity is computed from the provided model and the makeSensitivity method
-    '''
+    #'''
+    #Compute the SNR for a monochromatic GW source based on the source frequency f0, source ampltiude h0, obsertvation time T, and an instrument model. 
+    #
+    #The calculation follows (83) from the LISA-LCST-SGS-TN-001 (https://arxiv.org/abs/2108.01167) to compute the inclinaiton, polarization, and sky-position averaged SNR for a monochomatic source:
+    #$$
+    #\left<SNR^2\right>_{\iota,\psi,sky} = 10 \frac{\left(\frac{2}{5}h_0\right)^2T}{S_h\left(f_0\right)}
+    #$$
+    #
+    #where the instrument sensitivity is computed from the provided model and the makeSensitivity method
+    #'''
     
     
     # compute sensitivity at the GW frequency from the model
@@ -385,26 +385,26 @@ def getResolution(obsIn):
     
 
 def dResRange(fr,model):
-    '''
-    Here we construct two elementary figures of merit relevant for imaging, relevant for our imaging incoherent and our astrometric notions of imaging. 
+    #'''
+    #Here we construct two elementary figures of merit relevant for imaging, relevant for our imaging incoherent and our astrometric notions of imaging. 
+    #
+    #The first is basically diffraction limited resolution for short or long duration sources concentrated at some rerference frequency. The estimate is:
+    #$$
+    #\Delta \theta_\mathrm{diff} \approx F \frac{\lambda}{D}
+    #$$
+    #Where we suppose $F\approx 1$ and
+    #$$
+    #\max(L_\mathrm{constellation},D_\mathrm{sep})\leq D \leq \max(2R_{orbit},L_\mathrm{constellation},D_\mathrm{sep})
+    #$$
+    #depending on how long the source lasts compared to $T_\mathrm{orbit}$.
 
-    The first is basically diffraction limited resolution for short or long duration sources concentrated at some rerference frequency. The estimate is:
-    $$
-    \Delta \theta_\mathrm{diff} \approx F \frac{\lambda}{D}
-    $$
-    Where we suppose $F\approx 1$ and
-    $$
-    \max(L_\mathrm{constellation},D_\mathrm{sep})\leq D \leq \max(2R_{orbit},L_\mathrm{constellation},D_\mathrm{sep})
-    $$
-    depending on how long the source lasts compared to $T_\mathrm{orbit}$.
-
-    The other is astrometric localization which is scaled by the SNR:
-    $$
-    \Delta \theta_\mathrm{am} \approx \Delta \theta_\mathrm{diff}/\rho
-    $$
-
-    There are a number of different ways we can think about making plots using these, including horizon distances for reference classes of obervations, etc. More thought is needed on what makes sense..
-    '''
+    #The other is astrometric localization which is scaled by the SNR:
+    #$$
+    #\Delta \theta_\mathrm{am} \approx \Delta \theta_\mathrm{diff}/\rho
+    #$$
+    #
+    #There are a number of different ways we can think about making plots using these, including horizon distances for reference classes of obervations, etc. More thought is needed on what makes sense..
+    #'''
     
     D=model['Lconst']
     c=constants.c
@@ -663,7 +663,8 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
             t=Tdur
         f=f0
         snr = getCWsnr(f0,h0,t,model,resp_style)
-        rho2om2= snr**2*(2*np.pi*f0)
+        rho2om2= snr**2*(2*np.pi*f0)**2 # added square on second factor [2025-04-25]
+        #rho2om2= snr**2*(2*np.pi*f0)
         sig2orb=get_CW_sky_res_orbit(f0,h0,snr, model)
 
         observation['f']=f0
