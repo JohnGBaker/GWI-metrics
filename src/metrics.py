@@ -161,7 +161,7 @@ def getCWsnr(f0,h0,T,model,style='TN'):
     #'''
     #Compute the SNR for a monochromatic GW source based on the source frequency f0, source ampltiude h0, obsertvation time T, and an instrument model. 
     #
-    #The calculation follows (83) from the LISA-LCST-SGS-TN-001 (https://arxiv.org/abs/2108.01167) to compute the inclinaiton, polarization, and sky-position averaged SNR for a monochomatic source:
+    #The calculation follows (83) from the LISA-LCST-SGS-TN-001 (https://arxiv.org/abs/2108.01167) to compute the inclination, polarization, and sky-position averaged SNR for a monochomatic source:
     #$$
     #\left<SNR^2\right>_{\iota,\psi,sky} = 10 \frac{\left(\frac{2}{5}h_0\right)^2T}{S_h\left(f_0\right)}
     #$$
@@ -663,6 +663,7 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
             t=Tdur
         f=f0
         snr = getCWsnr(f0,h0,t,model,resp_style)
+        snr = snr[0] # converted from length-1 array to true scalar for consistency with chirp branch
         rho2om2= snr**2*(2*np.pi*f0)**2 # added square on second factor [2025-04-25]
         #rho2om2= snr**2*(2*np.pi*f0)
         sig2orb=get_CW_sky_res_orbit(f0,h0,snr, model)
@@ -765,13 +766,18 @@ def getSNRandSkyResolution(source,model, Nsamp=0, Nres = 1000, Tmax = None, resp
             
         #completion of chirp info
         observation['f']=f
+        print("chirp branch: sig2orb = ",sig2orb)
     else: 
         print('Unsupported source type')
 
+    #print('shape of rho2om2 is ',rho2om2.shape)
+
     #Now, for both CW and chirping,
-    #compute the constellation and separation contirbutions to resolution
+    #compute the constellation and separation contributions to resolution
     sig2con=get_sky_sigma2_Lconst(rho2om2,model)
     sig2sep=get_sky_sigma2_Dsep(rho2om2,model)
+
+    #print('shape of sig2con is ',sig2con.shape,' and shape of sig2orb is ',sig2orb.shape)
     #Assemble the total adding in quadrature
     sig2=(sig2orb**-1+np.minimum(sig2con,sig2sep)**-1)**-1
     if SNRcut is not None:
